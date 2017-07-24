@@ -12,6 +12,7 @@ MAINTAINER Bojan Cekrlic
 
 RUN	true && \
 	apk add --no-cache --update postfix ca-certificates supervisor rsyslog bash && \
+    apk add --no-cache --upgrade musl musl-utils && \
 	(rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
 
 COPY	supervisord.conf /etc/supervisord.conf

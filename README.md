@@ -33,6 +33,8 @@ The following configuration options are available:
 ENV vars
 $HOSTNAME = Postfix myhostname
 $RELAYHOST = Host that relays your msgs
+$RELAYHOST_USERNAME = An (optional) username for the relay server
+$RELAYHOST_PASSWORD = An (optional) login password for the relay server
 $MYNETWORKS = allow domains from per Network ( default 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 )
 $ALLOWED_SENDER_DOMAINS = domains sender domains
 ```
@@ -46,7 +48,7 @@ I suggest you set this variable, e.g.:
 docker run --rm --name postfix -e HOSTNAME=postfix-docker -p 1587:587 boky/postfix
 ```
 
-### `RELAYHOST`
+### `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD`
 
 Postfix will try to deliver emails directly to the target server. If you are behind a firewall, or inside a corporation
 you will most likely have a dedicated outgoing mail server. By setting this option, you will instruct postfix to relay
@@ -56,6 +58,22 @@ Example:
 ```
 docker run --rm --name postfix -e RELAYHOST=192.168.115.215 -p 1587:587 boky/postfix
 ```
+
+You may optionally specifiy a rely port, e.g.:
+```
+docker run --rm --name postfix -e RELAYHOST=192.168.115.215:587 -p 1587:587 boky/postfix
+```
+
+Or an IPv6 address, e.g.:
+```
+docker run --rm --name postfix -e 'RELAYHOST=[2001:db8::1]:587' -p 1587:587 boky/postfix
+```
+
+If your end server requires you to authenticate with username/password, add them also:
+```
+docker run --rm --name postfix -e RELAYHOST=mail.google.com -e RELAYHOST_USERNAME=hello@gmail.com -e RELAYHOST_PASSWORD=world -p 1587:587 boky/postfix
+```
+
 ### `MYNETWORKS`
 
 This implementation is meant for private installations -- so that when you configure your services using _docker compose_
@@ -79,3 +97,18 @@ Example:
 ```
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
+
+## Extending the image
+
+If you need to add custom configuration to postfix or have it do something outside of the scope of this configuration, simply
+add your scripts to `/docker-init.db/`. All files with the `.sh` extension will be executed automatically at the end of the
+startup script.
+
+E.g.: create a custom `Dockerfile` like this:
+```
+FROM boky/postfix
+MAINTAINER Some Randombloke "randombloke@example.com"
+ADD Dockerfiles/additiona-config.sh /docker-init.db/
+```
+
+Build it with docker and your script will be automatically executed before Postfix starts.

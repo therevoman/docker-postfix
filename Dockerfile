@@ -1,14 +1,7 @@
 FROM alpine:edge
-MAINTAINER Bojan Cekrlic
+MAINTAINER Bojan Cekrlic - https://github.com/bokysan/docker-postfix/
 
-# You can set this variables when running the image to override the host name or
-# foward the messages to another server
-# ENV	HOSTNAME
-# Hostname that will be used in the outgoing mail
-# ENV	RELAYHOST
-# The relay host for this server
-# ENV	ALLOWED_SENDER_DOMAINS
-# Limit the list of sending domains to this list only
+# See README.md for details
 
 RUN	true && \
 	apk add --no-cache --update postfix ca-certificates supervisor rsyslog bash && \
@@ -17,8 +10,8 @@ RUN	true && \
 
 COPY	supervisord.conf /etc/supervisord.conf
 COPY	rsyslog.conf /etc/rsyslog.conf
-COPY	postfix.sh /postfix.sh
-RUN	chmod +x /postfix.sh
+COPY	run.sh /run.sh
+RUN	chmod +x /run.sh
 
 VOLUME	[ "/var/spool/postfix", "/etc/postfix" ]
 
@@ -26,4 +19,5 @@ USER	root
 WORKDIR	/tmp
 
 EXPOSE 587
-ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+#ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/run.sh"]

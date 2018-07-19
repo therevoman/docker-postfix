@@ -1,10 +1,17 @@
 # docker-postfix
 Simple postfix relay host for your Docker containers. Based on Alpine Linux.
 
+
+## Project update
+
+Notice, that while this commits are old, there project is not dead. It's simply considered feature complete. You will find the latest
+version of the code on Dockerhub (https://hub.docker.com/r/boky/postfix). If you do have any suggestions, feel free to clone and post
+a merge.
+
 ## Description
 
 This image allows you to run POSTFIX internally inside your docker cloud/swarm installation to centralise outgoing email sending. The
-embedded postfix enables you to either ____send messages directly_ or _relay them to your company's main server_.
+embedded postfix enables you to either _send messages directly_ or _relay them to your company's main server_.
 
 This is a _server side_ POSTFIX image, geared towards emails that need to be sent from your applications. That's why this postfix
 configuration does not support username / password login or similar client-side security features.

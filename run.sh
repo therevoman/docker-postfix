@@ -89,7 +89,7 @@ else
 #   Update: loosen up on RCPT checks. This will mean we might get some emails which are not valid, but the service connecting
 #           will be able to send out emails much faster, as there will be no lookup and lockup if the target server is not responing or availalb.e
 #	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,reject_unverified_recipient"
-	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, permit"
+	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, defer_unauth_destination, permit"
 fi
 
 # Since we are behind closed doors, let's just permit all relays.

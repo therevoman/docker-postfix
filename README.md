@@ -66,7 +66,7 @@ Example:
 docker run --rm --name postfix -e RELAYHOST=192.168.115.215 -p 1587:587 boky/postfix
 ```
 
-You may optionally specifiy a rely port, e.g.:
+You may optionally specifiy a relay port, e.g.:
 ```
 docker run --rm --name postfix -e RELAYHOST=192.168.115.215:587 -p 1587:587 boky/postfix
 ```

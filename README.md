@@ -4,9 +4,7 @@ Simple postfix relay host for your Docker containers. Based on Alpine Linux.
 
 ## Project update
 
-Notice, that while this commits are old, there project is not dead. It's simply considered feature complete. You will find the latest
-version of the code on Dockerhub (https://hub.docker.com/r/boky/postfix). If you do have any suggestions, feel free to clone and post
-a merge.
+**Notice, that while this commits are old, there project is not dead.** It's simply considered feature complete. You will find the latest version of the code on Dockerhub (https://hub.docker.com/r/boky/postfix). If you do have any suggestions, feel free to clone and post a merge.
 
 ## Description
 

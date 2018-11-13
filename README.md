@@ -12,7 +12,7 @@ This image allows you to run POSTFIX internally inside your docker cloud/swarm i
 
 This is a _server side_ POSTFIX image, geared towards emails that need to be sent from your applications. That's why this postfix configuration does not support username / password login or similar client-side security features.
 
-**IF YOU WANT TO SET UP AND MANAGE A POSTFIX INSTALLATION FOR END USERS, THIS IMAGE IS NOT FOR YOUR.** If you need it to manage your application's outgoing queue, read on.
+**IF YOU WANT TO SET UP AND MANAGE A POSTFIX INSTALLATION FOR END USERS, THIS IMAGE IS NOT FOR YOU.** If you need it to manage your application's outgoing queue, read on.
 
 ## TL;DR
 

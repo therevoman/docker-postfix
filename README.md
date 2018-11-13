@@ -10,14 +10,11 @@ a merge.
 
 ## Description
 
-This image allows you to run POSTFIX internally inside your docker cloud/swarm installation to centralise outgoing email sending. The
-embedded postfix enables you to either _send messages directly_ or _relay them to your company's main server_.
+This image allows you to run POSTFIX internally inside your docker cloud/swarm installation to centralise outgoing email sending. The embedded postfix enables you to either _send messages directly_ or _relay them to your company's main server_.
 
-This is a _server side_ POSTFIX image, geared towards emails that need to be sent from your applications. That's why this postfix
-configuration does not support username / password login or similar client-side security features.
+This is a _server side_ POSTFIX image, geared towards emails that need to be sent from your applications. That's why this postfix configuration does not support username / password login or similar client-side security features.
 
-If you want to set up and manage your POSTFIX installation for end users, this image is not for you. If you need it to manage your
-application's outgoing queue, read on.
+**IF YOU WANT TO SET UP AND MANAGE A POSTFIX INSTALLATION FOR END USERS, THIS IMAGE IS NOT FOR YOUR.** If you need it to manage your application's outgoing queue, read on.
 
 ## TL;DR
 

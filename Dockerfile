@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:latest
 MAINTAINER Bojan Cekrlic - https://github.com/bokysan/docker-postfix/
 
 # See README.md for details

@@ -110,7 +110,7 @@ E.g.: create a custom `Dockerfile` like this:
 ```
 FROM boky/postfix
 MAINTAINER Some Randombloke "randombloke@example.com"
-ADD Dockerfiles/additiona-config.sh /docker-init.db/
+ADD Dockerfiles/additional-config.sh /docker-init.db/
 ```
 
 Build it with docker and your script will be automatically executed before Postfix starts.

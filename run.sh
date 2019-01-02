@@ -1,8 +1,67 @@
 #!/bin/sh
 
-echo "******************************"
-echo "**** POSTFIX STARTING UP *****"
-echo "******************************"
+reset=""
+yellow=""
+yellow_bold=""
+red=""
+orange=""
+
+# Returns 0 if the specified string contains the specified substring, otherwise returns 1.
+# This exercise it required because we are using the sh-compatible interpretation instead
+# of bash.
+contains() {
+    string="$1"
+    substring="$2"
+    if test "${string#*$substring}" != "$string"
+    then
+        return 0    # $substring is in $string
+    else
+        return 1    # $substring is not in $string
+    fi
+}
+
+if test -t 1; then
+	# Quick and dirty test for color support
+	if contains "$TERM" "256" || contains "$COLORTERM" "256"  || contains "$COLORTERM" "color" || contains "$COLORTERM" "24bit"; then
+		reset="\033[0m"
+		green="\033[38;5;46m"
+		yellow="\033[38;5;178m"
+		red="\033[91m"
+		orange="\033[38;5;208m"
+
+		emphasis="\033[38;5;226m"
+	elif contains "$TERM" "xterm"; then
+		reset="\033[0m"
+		green="\033[32m"
+		yellow="\033[33m"
+		red="\033[31;1m"
+		orange="\033[31m"
+
+		emphasis="\033[33;1m"
+	fi
+fi
+
+info="${green}INFO:${reset}"
+notice="${yellow}NOTE:${reset}"
+warn="${orange}WARN:${reset}"
+
+echo -e "******************************"
+echo -e "**** POSTFIX STARTING UP *****"
+echo -e "******************************"
+
+# Check if we need to configure the container timezone
+if [ ! -z "$TZ" ]; then
+	TZ_FILE="/usr/share/zoneinfo/$TZ"
+	if [ -f "$TZ_FILE" ]; then
+		echo  -e "‣ $notice Setting container timezone to: ${emphasis}$TZ${reset}"
+		ln -snf "$TZ_FILE" /etc/localtime 
+		echo "$TZ" > /etc/timezone 
+	else
+		echo  -e "‣ $warn Cannot set timezone to: ${emphasis}$TZ${reset} -- this timezone does not exist."
+	fi
+else
+	echo  -e "‣ $info Not setting any timezone for the container"
+fi
 
 # Make and reown postfix folders
 mkdir -p /var/spool/postfix/ && mkdir -p /var/spool/postfix/pid
@@ -20,41 +79,58 @@ postconf -e mydestination=
 # Don't relay for any domains
 postconf -e relay_domains=
 
-# As this is a server-based service, allow any message size -- we hope the sender knows
-# what he is doing
-postconf -e "message_size_limit=0"
+if [ ! -z "$MESSAGE_SIZE_LIMIT" ]; then
+	echo  -e "‣ $notice Restricting message_size_limit to: ${emphasis}$MESSAGE_SIZE_LIMIT bytes${reset}"
+	postconf -e "message_size_limit=$MESSAGE_SIZE_LIMIT"
+else
+	# As this is a server-based service, allow any message size -- we hope the sender knows
+	# what he is doing
+	echo  -e "‣ $info Using ${emphasis}unlimited${reset} message size."
+	postconf -e "message_size_limit=0"
+fi
 
 # Reject invalid HELOs
 postconf -e smtpd_delay_reject=yes
 postconf -e smtpd_helo_required=yes
 postconf -e "smtpd_helo_restrictions=permit_mynetworks,reject_invalid_helo_hostname,permit"
+postconf -e "smtpd_sender_restrictions=permit_mynetworks"
 
 # Set up host name
 if [ ! -z "$HOSTNAME" ]; then
+	echo  -e "‣ $notice Setting myhostname: ${emphasis}$HOSTNAME${reset}"
 	postconf -e myhostname="$HOSTNAME"
 else
 	postconf -# myhostname
 fi
 
+if [ -z "$RELAYHOST_TLS_LEVEL" ]; then
+	echo  -e "‣ $info Setting smtp_tls_security_level: ${emphasis}may${reset}"
+	postconf -e "smtp_tls_security_level=may"
+else
+	echo  -e "‣ $notice Setting smtp_tls_security_level: ${emphasis}$RELAYHOST_TLS_LEVEL${reset}"
+	postconf -e "smtp_tls_security_level=$RELAYHOST_TLS_LEVEL"
+fi
+
 # Set up a relay host, if needed
 if [ ! -z "$RELAYHOST" ]; then
-	echo -n "- Forwarding all emails to $RELAYHOST"
-	postconf -e relayhost=$RELAYHOST
+	echo -en "‣ $notice Forwarding all emails to ${emphasis}$RELAYHOST${reset}"
+	postconf -e "relayhost=$RELAYHOST"
+	# Alternately, this could be a folder, like this:
+	# smtp_tls_CApath
+	postconf -e "smtp_tls_CAfile=/etc/ssl/certs/ca-certificates.crt"
 
 	if [ -n "$RELAYHOST_USERNAME" ] && [ -n "$RELAYHOST_PASSWORD" ]; then
-		echo " using username $RELAYHOST_USERNAME."
+		echo -e " using username ${emphasis}$RELAYHOST_USERNAME${reset} and password ${emphasis}(redacted)${reset}."
 		echo "$RELAYHOST $RELAYHOST_USERNAME:$RELAYHOST_PASSWORD" >> /etc/postfix/sasl_passwd
 		postmap hash:/etc/postfix/sasl_passwd
 		postconf -e "smtp_sasl_auth_enable=yes"
 		postconf -e "smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd"
-		postconf -e "smtp_tls_CAfile=/etc/ssl/certs/ca-certificates.crt"
-		postconf -e "smtp_enforce_tls=yes"
 		postconf -e "smtp_sasl_security_options=noanonymous"
 	else
-		echo " without any authentication. Make sure your server is configured to accept emails coming from this IP."
+		echo -e " without any authentication. ${emphasis}Make sure your server is configured to accept emails coming from this IP.${reset}"
 	fi
 else
-	echo "- Will try to deliver emails directly to the final server. Make sure your DNS is setup properly!"
+	echo -e "‣ $notice Will try to deliver emails directly to the final server. ${emphasis}Make sure your DNS is setup properly!${reset}"
 	postconf -# relayhost
 	postconf -# smtp_sasl_auth_enable
 	postconf -# smtp_sasl_password_maps
@@ -62,19 +138,27 @@ else
 fi
 
 if [ ! -z "$MYNETWORKS" ]; then
-	postconf -e mynetworks=$MYNETWORKS
+	echo  -e "‣ $notice Using custom allowed networks: ${emphasis}$MYNETWORKS${reset}"
 else
-	postconf -e "mynetworks=127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+	echo  -e "‣ $info Using default private network list for trusted networks."
+	MYNETWORKS="127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
 fi
+
+postconf -e "mynetworks=$MYNETWORKS"
+
+if [ ! -z "$INBOUND_DEBUGGING" ]; then
+	echo  -e "‣ $notice Enabling additional debbuging for: ${emphasis}$MYNETWORKS${reset}"
+	postconf -e "debug_peer_list=$MYNETWORKS"
+fi 
 
 # Split with space
 if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
-	echo -n "- Setting up allowed SENDER domains:"
+	echo -en "‣ $notice Setting up allowed SENDER domains:"
 	allowed_senders=/etc/postfix/allowed_senders
 	rm -f $allowed_senders $allowed_senders.db > /dev/null
 	touch $allowed_senders
 	for i in $ALLOWED_SENDER_DOMAINS; do
-		echo -n " $i"
+		echo -ne " ${emphasis}$i${reset}"
 		echo -e "$i\tOK" >> $allowed_senders
 	done
 	echo
@@ -86,31 +170,28 @@ if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
 #           will be able to send out emails much faster, as there will be no lookup and lockup if the target server is not responing or available.
 #	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, reject_unverified_recipient, check_sender_access hash:$allowed_senders, reject"
 	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:$allowed_senders, reject"
-else
-	postconf -# "smtpd_restriction_classes"
-#   Update: loosen up on RCPT checks. This will mean we might get some emails which are not valid, but the service connecting
-#           will be able to send out emails much faster, as there will be no lookup and lockup if the target server is not responing or available.
-#	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,reject_unverified_recipient"
-	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, defer_unauth_destination, permit"
-fi
 
-# Since we are behind closed doors, let's just permit all relays.
-postconf -e "smtpd_relay_restrictions=permit"
+	# Since we are behind closed doors, let's just permit all relays.
+	postconf -e "smtpd_relay_restrictions=permit"
+else
+	echo -e "ERROR: You need to specify sender domains otherwise Postfix will not run!"
+	exit 1
+fi
 
 
 # Use 587 (submission)
 sed -i -r -e 's/^#submission/submission/' /etc/postfix/master.cf
 
 if [ -d /docker-init.db/ ]; then
-	echo "- Executing any found custom scripts..."
+	echo -e "‣ $notice Executing any found custom scripts..."
 	for f in /docker-init.db/*; do
 		case "$f" in
-			*.sh)     chmod +x "$f"; echo -e"\trunning $f"; . "$f" ;;
+			*.sh)     chmod +x "$f"; echo -e "\trunning ${emphasis}$f${reset}"; . "$f" ;;
 			*)        echo "$0: ignoring $f" ;;
 		esac
 	done
 fi
 
-echo "- Staring rsyslog and postfix"
+echo -e "‣ $notice Staring ${emphasis}rsyslog${reset} and ${emphasis}postfix${reset}"
 exec supervisord -c /etc/supervisord.conf
 

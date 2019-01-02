@@ -18,7 +18,7 @@ This is a _server side_ POSTFIX image, geared towards emails that need to be sen
 
 To run the container, do the following:
 ```
-docker run --rm --name postfix -p 1587:587 boky/postfix
+docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
 You can now send emails by using `localhost:1587` as your SMTP server address. **Please note that
@@ -76,6 +76,22 @@ If your end server requires you to authenticate with username/password, add them
 docker run --rm --name postfix -e RELAYHOST=mail.google.com -e RELAYHOST_USERNAME=hello@gmail.com -e RELAYHOST_PASSWORD=world -p 1587:587 boky/postfix
 ```
 
+### `RELAYHOST_TLS_LEVEL`
+
+Define relay host TLS connection level. See http://www.postfix.org/postconf.5.html#smtp_tls_security_level for details. By default, the permissive level ("may") is used, which basically means "use TLS if available" and should be a sane default in most cases.
+
+This level defines how the postfix will connect to your upstream server.
+
+### `MESSAGE_SIZE_LIMIT`
+
+Define the maximum size of the message, in bytes. 
+See more in [Postfix documentation](http://www.postfix.org/postconf.5.html#message_size_limit). 
+
+By default, this limit is set to 0 (zero), which means unlimited. Why would you want to set this? Well, this is especially useful in relation
+with `RELAYHOST` setting. If your relay host has a message limit (and usually it does), set it also here. This will help you "fail fast" --
+your message will be rejected at the time of sending instead having it stuck in the outbound queue indefenetly.
+
+
 ### `MYNETWORKS`
 
 This implementation is meant for private installations -- so that when you configure your services using _docker compose_
@@ -92,18 +108,23 @@ docker run --rm --name postfix -e "MYNETWORKS=10.1.2.0/24" -p 1587:587 boky/post
 
 ### `ALLOWED_SENDER_DOMAINS`
 
-If your application is sending email from just a few domains (and most application do), it is a good practice to lock the
-POSTFIX further down and accept email from these domains only.
+Due to in-built spam protection in [Postfix](http://www.postfix.org/postconf.5.html#smtpd_relay_restrictions) you will need to specify
+sender domains -- the domains you are using to send your emails from, otherwise Postfix will refuse to start.
 
 Example:
 ```
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
+### `INBOUND_DEBUGGING`
+
+Enable additional debugging for any connection comming from `MYNETWORKS`. Set to a non-empty string (usually "1" or "yes") to
+enable debugging.
+
 ## Extending the image
 
 If you need to add custom configuration to postfix or have it do something outside of the scope of this configuration, simply
-add your scripts to `/docker-init.db/`. All files with the `.sh` extension will be executed automatically at the end of the
+add your scripts to `/docker-init.db/`: All files with the `.sh` extension will be executed automatically at the end of the
 startup script.
 
 E.g.: create a custom `Dockerfile` like this:
@@ -114,6 +135,15 @@ ADD Dockerfiles/additional-config.sh /docker-init.db/
 ```
 
 Build it with docker and your script will be automatically executed before Postfix starts.
+
+Or -- alternately -- bind this folder in your docker config and put your scripts there. Useful if you need to add additional config
+to your postfix server or override configs created by the script.
+
+For example, your script could contain something like this:
+```
+#!/bin/sh
+postconf -e "address_verify_negative_cache=yes"
+```
 
 ## Security
 

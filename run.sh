@@ -54,8 +54,8 @@ if [ ! -z "$TZ" ]; then
 	TZ_FILE="/usr/share/zoneinfo/$TZ"
 	if [ -f "$TZ_FILE" ]; then
 		echo  -e "‣ $notice Setting container timezone to: ${emphasis}$TZ${reset}"
-		ln -snf "$TZ_FILE" /etc/localtime 
-		echo "$TZ" > /etc/timezone 
+		ln -snf "$TZ_FILE" /etc/localtime
+		echo "$TZ" > /etc/timezone
 	else
 		echo  -e "‣ $warn Cannot set timezone to: ${emphasis}$TZ${reset} -- this timezone does not exist."
 	fi
@@ -76,15 +76,19 @@ postalias /etc/postfix/aliases
 
 # Disable local mail delivery
 postconf -e mydestination=
+
 # Don't relay for any domains
 postconf -e relay_domains=
+
+# Increase the allowed header size, the default (102400) is quite smallish
+postconf -e "header_size_limit=4096000"
 
 if [ ! -z "$MESSAGE_SIZE_LIMIT" ]; then
 	echo  -e "‣ $notice Restricting message_size_limit to: ${emphasis}$MESSAGE_SIZE_LIMIT bytes${reset}"
 	postconf -e "message_size_limit=$MESSAGE_SIZE_LIMIT"
 else
-	# As this is a server-based service, allow any message size -- we hope the sender knows
-	# what he is doing
+	# As this is a server-based service, allow any message size -- we hope the 
+	# sender knows what he is doing.
 	echo  -e "‣ $info Using ${emphasis}unlimited${reset} message size."
 	postconf -e "message_size_limit=0"
 fi
@@ -126,6 +130,7 @@ if [ ! -z "$RELAYHOST" ]; then
 		postconf -e "smtp_sasl_auth_enable=yes"
 		postconf -e "smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd"
 		postconf -e "smtp_sasl_security_options=noanonymous"
+		postconf -e "smtp_sasl_tls_security_options=noanonymous"
 	else
 		echo -e " without any authentication. ${emphasis}Make sure your server is configured to accept emails coming from this IP.${reset}"
 	fi
@@ -149,7 +154,7 @@ postconf -e "mynetworks=$MYNETWORKS"
 if [ ! -z "$INBOUND_DEBUGGING" ]; then
 	echo  -e "‣ $notice Enabling additional debbuging for: ${emphasis}$MYNETWORKS${reset}"
 	postconf -e "debug_peer_list=$MYNETWORKS"
-fi 
+fi
 
 # Split with space
 if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
@@ -178,6 +183,11 @@ else
 	exit 1
 fi
 
+if [ ! -z "$MASQUERADED_DOMAINS" ]; then
+        echo -en "‣ $notice Setting up address masquerading: ${emphasis}$MASQUERADED_DOMAINS${reset}"
+        postconf -e "masquerade_domains = $MASQUERADED_DOMAINS"
+        postconf -e "local_header_rewrite_clients = static:all"
+fi
 
 # Use 587 (submission)
 sed -i -r -e 's/^#submission/submission/' /etc/postfix/master.cf

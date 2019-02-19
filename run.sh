@@ -201,7 +201,7 @@ if [ ! -z "$MASQUERADED_DOMAINS" ]; then
 fi
 
 DKIM_ENABLED=
-if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type d ! -name .)" ]; then
+if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type f ! -name .)" ]; then
 	DKIM_ENABLED=", ${emphasis}opendkim${reset}"
 	echo  -e "‣ $notice Configuring OpenDKIM."
 	mkdir -p /var/run/opendkim
@@ -227,7 +227,7 @@ if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type d ! -nam
 	echo "" >> /etc/opendkim/TrustedHosts
 	if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
 		for i in $ALLOWED_SENDER_DOMAINS; do
-			private_key=/etc/opendkim/keys/$i/mail.private
+			private_key=/etc/opendkim/keys/$i.private
 			if [ -f $private_key ]; then
 				echo -e "        ...for domain ${emphasis}$i${reset}"
 				echo "*.$i" >> /etc/opendkim/TrustedHosts

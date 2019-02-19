@@ -145,16 +145,13 @@ You'll need to create a  folder for every domain you want to send through Postfi
 
 ```
 mkdir -p /host/keys; cd /host/keys
-mkdir example.com; cd example.com
-opendkim-genkey -s mail -d example.com
-cd ..
-mkdir example.org; cd example.org
-opendkim-genkey -s mail -d example.org
+opendkim-genkey -b 2048 -h rsa-sha256 -r -v -s example.com -d example.com
+opendkim-genkey -b 2048 -h rsa-sha256 -r -v -s example.org -d example.org
 ```
 
 `opendkim-genkey` is usually in your favourite distribution provided by installing `opendkim-tools` or `opendkim-utils`.
 
-Add the created `mail.txt` files to your DNS record. Afterwards, just mount `/etc/opendkim/keys` into your image and DKIM 
+Add the created `<domain>.txt` files to your DNS records. Afterwards, just mount `/etc/opendkim/keys` into your image and DKIM 
 will be used automatically, e.g.:
 ```
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -v /host/keys:/etc/opendkim/keys -p 1587:587 boky/postfix

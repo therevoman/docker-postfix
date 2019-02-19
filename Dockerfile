@@ -26,8 +26,12 @@ ENV MESSAGE_SIZE_LIMIT=
 ENV INBOUND_DEBUGGING=
 
 # Install supervisor, postfix
+# Install postfix first to get the first account (101)
+# Install opendkim second to get the second account (102)
 RUN        true && \
-           apk add --no-cache --update postfix ca-certificates tzdata supervisor rsyslog opendkim && \
+           apk add --no-cache postfix && \
+           apk add --no-cache opendkim && \
+           apk add --no-cache ca-certificates tzdata supervisor rsyslog && \
            apk add --no-cache --upgrade musl musl-utils && \
            (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
 

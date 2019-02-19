@@ -1,5 +1,5 @@
 FROM alpine:latest
-MAINTAINER Bojan Cekrlic - https://github.com/bokysan/docker-postfix/
+LABEL maintaner="Bojan Cekrlic - https://github.com/bokysan/docker-postfix/"
 
 # See README.md for details
 
@@ -27,23 +27,25 @@ ENV INBOUND_DEBUGGING=
 
 # Install supervisor, postfix
 RUN        true && \
-           apk add --no-cache --update postfix ca-certificates tzdata supervisor rsyslog && \
+           apk add --no-cache --update postfix ca-certificates tzdata supervisor rsyslog opendkim && \
            apk add --no-cache --upgrade musl musl-utils && \
            (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
 
 # Set up configuration
 COPY       supervisord.conf /etc/supervisord.conf
 COPY       rsyslog.conf /etc/rsyslog.conf
+COPY       opendkim.conf /etc/opendkim/opendkim.conf
 COPY       run.sh /run.sh
-RUN        chmod +x /run.sh
+COPY       opendkim.sh /opendkim.sh
+RUN        chmod +x /run.sh /opendkim.sh
 
-# Set up spool volume
-VOLUME     [ "/var/spool/postfix", "/etc/postfix" ]
+# Set up volumes
+VOLUME     [ "/var/spool/postfix", "/etc/postfix", "/etc/opendkim/keys" ]
 
 # Run supervisord
 USER       root
 WORKDIR    /tmp
 
 EXPOSE     587
-ENTRYPOINT ["/run.sh"]
+CMD        ["/bin/sh", "-c", "/run.sh"]
 

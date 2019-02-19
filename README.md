@@ -21,12 +21,17 @@ To run the container, do the following:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
-You can now send emails by using `localhost:1587` as your SMTP server address. **Please note that
-the image uses the submission (587) port by default**. Port 25 is not exposed on purpose, as it's
-regularly blocked by ISP or already occupied by other services.
+You can now send emails by using `localhost:1587` as your SMTP server address. Of course, if
+you haven't configured your `example.com` domain to allow sending from this IP (see
+[openspf](http://www.openspf.org/)), your emails will most likely be regarded as spam.
 
 All standard caveats of configuring the SMTP server apply -- e.g. you'll need to make sure your DNS
 entries are updated properly if you don't want your emails marked as spam.
+
+**Please note that the image uses the submission (587) port by default**. Port 25 is not 
+exposed on purpose, as it's regularly blocked by ISP or already occupied by other services.
+
+
 
 ## Configuration options
 
@@ -40,6 +45,7 @@ $RELAYHOST_PASSWORD = An (optional) login password for the relay server
 $MYNETWORKS = allow domains from per Network ( default 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 )
 $ALLOWED_SENDER_DOMAINS = domains sender domains
 $MASQUERADED_DOMAINS = domains where you want to masquerade internal hosts
+
 ```
 ### `HOSTNAME`
 
@@ -132,6 +138,27 @@ Example:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -e "MASQUERADED_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
+## `DKIM`
+
+**This image is equiped with support for DKIM.** If you want to use DKIM you will need to generate DKIM keys yourself. 
+You'll need to create a  folder for every domain you want to send through Postfix and generate they key(s) with the following command, e.g.
+
+```
+mkdir -p /host/keys; cd /host/keys
+mkdir example.com; cd example.com
+opendkim-genkey -s mail -d example.com
+cd ..
+mkdir example.org; cd example.org
+opendkim-genkey -s mail -d example.corg
+```
+
+`opendkim-genkey` is usually in your favourite distribution provided by installing `opendkim-tools` or `opendkim-utils`.
+
+Add the created `mail.txt` files to your DNS record. Afterwards, just mount `/etc/opendkim/keys` into your image and DKIM 
+will be used automatically, e.g.:
+```
+docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -v /host/keys:/etc/opendkim/keys -p 1587:587 boky/postfix
+```
 
 ## Extending the image
 
@@ -142,7 +169,7 @@ startup script.
 E.g.: create a custom `Dockerfile` like this:
 ```
 FROM boky/postfix
-MAINTAINER Some Randombloke "randombloke@example.com"
+LABEL maintainer="Jack Sparrow <jack.sparrow@theblackpearl.example.com>"
 ADD Dockerfiles/additional-config.sh /docker-init.db/
 ```
 
@@ -161,4 +188,4 @@ postconf -e "address_verify_negative_cache=yes"
 ## Security
 
 Postfix will run the master proces as `root`, because that's how it's designed. Subprocesses will run under the `postfix` account
-which will use `UID:GID` of `100:101`.
+which will use `UID:GID` of `100:101`. `opendkim` will run under account `102:103`.

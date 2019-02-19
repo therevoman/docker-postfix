@@ -154,11 +154,22 @@ postconf -e "mynetworks=$MYNETWORKS"
 if [ ! -z "$INBOUND_DEBUGGING" ]; then
 	echo  -e "‣ $notice Enabling additional debbuging for: ${emphasis}$MYNETWORKS${reset}"
 	postconf -e "debug_peer_list=$MYNETWORKS"
+
+	sed -i -E 's/^[ \t]*#?[ \t]*LogWhy[ \t]*.+$/LogWhy                  yes/' /etc/opendkim/opendkim.conf
+	if ! egrep -q '^LogWhy' /etc/opendkim/opendkim.conf; then
+		echo >> /etc/opendkim/opendkim.conf
+		echo "LogWhy                  yes" >> /etc/opendkim/opendkim.conf
+	fi
+else
+	sed -i -E 's/^[ \t]*#?[ \t]*LogWhy[ \t]*.+$/LogWhy                  no/' /etc/opendkim/opendkim.conf
+	if ! egrep -q '^LogWhy' /etc/opendkim/opendkim.conf; then
+		echo >> /etc/opendkim/opendkim.conf
+		echo "LogWhy                  no" >> /etc/opendkim/opendkim.conf
+	fi
 fi
 
-# Split with space
 if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
-	echo -en "‣ $notice Setting up allowed SENDER domains:"
+	echo -en "‣ $info Setting up allowed SENDER domains:"
 	allowed_senders=/etc/postfix/allowed_senders
 	rm -f $allowed_senders $allowed_senders.db > /dev/null
 	touch $allowed_senders
@@ -179,7 +190,7 @@ if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
 	# Since we are behind closed doors, let's just permit all relays.
 	postconf -e "smtpd_relay_restrictions=permit"
 else
-	echo -e "ERROR: You need to specify sender domains otherwise Postfix will not run!"
+	echo -e "ERROR: You need to specify ALLOWED_SENDER_DOMAINS otherwise Postfix will not run!"
 	exit 1
 fi
 
@@ -187,6 +198,50 @@ if [ ! -z "$MASQUERADED_DOMAINS" ]; then
         echo -en "‣ $notice Setting up address masquerading: ${emphasis}$MASQUERADED_DOMAINS${reset}"
         postconf -e "masquerade_domains = $MASQUERADED_DOMAINS"
         postconf -e "local_header_rewrite_clients = static:all"
+fi
+
+DKIM_ENABLED=
+if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type d ! -name .)" ]; then
+	DKIM_ENABLED=", ${emphasis}opendkim${reset}"
+	echo  -e "‣ $notice Configuring OpenDKIM."
+	mkdir -p /var/run/opendkim
+	chown -R opendkim:opendkim /var/run/opendkim
+	dkim_socket=$(cat /etc/opendkim/opendkim.conf | egrep ^Socket | awk '{ print $2 }')
+	if [ $(echo "$dkim_socket" | cut -d: -f1) == "inet" ]; then
+		dkim_socket=$(echo "$dkim_socket" | cut -d: -f2)
+		dkim_socket="inet:$(echo "$dkim_socket" | cut -d@ -f2):$(echo "$dkim_socket" | cut -d@ -f1)"
+	fi
+	echo -e "        ...using socket $dkim_socket"
+
+	postconf -e "milter_protocol=2"
+	postconf -e "milter_default_action=accept"
+	postconf -e "smtpd_milters=$dkim_socket"
+	postconf -e "non_smtpd_milters=$dkim_socket"
+
+	echo > /etc/opendkim/TrustedHosts
+	echo > /etc/opendkim/KeyTable
+	echo > /etc/opendkim/SigningTable
+
+	echo "127.0.0.1" >> /etc/opendkim/TrustedHosts
+	echo "localhost" >> /etc/opendkim/TrustedHosts
+	echo "" >> /etc/opendkim/TrustedHosts
+	if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
+		for i in $ALLOWED_SENDER_DOMAINS; do
+			private_key=/etc/opendkim/keys/$i/mail.private
+			if [ -f $private_key ]; then
+				echo -e "        ...for domain ${emphasis}$i${reset}"
+				echo "*.$i" >> /etc/opendkim/TrustedHosts
+				echo "mail._domainkey.$i $i:mail:$private_key" >> /etc/opendkim/KeyTable
+				echo "*@$i mail._domainkey.$i" > /etc/opendkim/SigningTable
+			else
+				echo "  ...$warn skipping for domain ${emphasis}$i${reset}. File $private_key not found!"
+			fi
+		done
+	fi
+else
+	echo  -e "‣ $info No DKIM keys found, will not use DKIM."
+	postconf -# smtpd_milters
+	postconf -# non_smtpd_milters
 fi
 
 # Use 587 (submission)
@@ -202,6 +257,6 @@ if [ -d /docker-init.db/ ]; then
 	done
 fi
 
-echo -e "‣ $notice Staring ${emphasis}rsyslog${reset} and ${emphasis}postfix${reset}"
+echo -e "‣ $notice Starting: ${emphasis}rsyslog${reset}, ${emphasis}postfix${reset}$DKIM_ENABLED"
 exec supervisord -c /etc/supervisord.conf
 

@@ -149,7 +149,7 @@ mkdir example.com; cd example.com
 opendkim-genkey -s mail -d example.com
 cd ..
 mkdir example.org; cd example.org
-opendkim-genkey -s mail -d example.corg
+opendkim-genkey -s mail -d example.org
 ```
 
 `opendkim-genkey` is usually in your favourite distribution provided by installing `opendkim-tools` or `opendkim-utils`.

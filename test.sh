@@ -16,6 +16,7 @@ DATA
 Subject: Postfix message test
 From: test@example.org
 To: check-auth@verifier.port25.com
+Date: Wed, 06 Mar 19 09:40:08 +0000
 Content-Type: text/plain
 
 This is a simple text

@@ -222,15 +222,24 @@ if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type f ! -nam
 	echo > /etc/opendkim/KeyTable
 	echo > /etc/opendkim/SigningTable
 
+	echo "::1" >> /etc/opendkim/TrustedHosts
 	echo "127.0.0.1" >> /etc/opendkim/TrustedHosts
 	echo "localhost" >> /etc/opendkim/TrustedHosts
+
+	oldIFS="$IFS"
+	IFS=','; for i in $MYNETWORKS; do
+		echo "$i" >> /etc/opendkim/TrustedHosts
+	done
+	IFS="$oldIFS"
 	echo "" >> /etc/opendkim/TrustedHosts
+
 	if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
 		for i in $ALLOWED_SENDER_DOMAINS; do
 			private_key=/etc/opendkim/keys/$i.private
 			if [ -f $private_key ]; then
 				echo -e "        ...for domain ${emphasis}$i${reset}"
 				echo "*.$i" >> /etc/opendkim/TrustedHosts
+				echo "$i" >> /etc/opendkim/TrustedHosts
 				echo "mail._domainkey.$i $i:mail:$private_key" >> /etc/opendkim/KeyTable
 				echo "*@$i mail._domainkey.$i" > /etc/opendkim/SigningTable
 			else

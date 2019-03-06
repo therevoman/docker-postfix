@@ -145,8 +145,17 @@ You'll need to create a  folder for every domain you want to send through Postfi
 
 ```
 mkdir -p /host/keys; cd /host/keys
-opendkim-genkey -b 2048 -h rsa-sha256 -r -v -s example.com -d example.com
-opendkim-genkey -b 2048 -h rsa-sha256 -r -v -s example.org -d example.org
+
+for DOMAIN in example.com example.org; do
+    # Generate a key with selector "mail"
+    opendkim-genkey -b 2048 -h rsa-sha256 -r -v --subdomains -s mail -d $DOMAIN
+    # Fixes https://github.com/linode/docs/pull/620
+    sed -i 's/h=rsa-sha256/h=sha256/' mail.txt
+    # Move to proper file
+    mv mail.private $DOMAIN.private
+    mv mail.txt $DOMAIN.txt
+done
+...
 ```
 
 `opendkim-genkey` is usually in your favourite distribution provided by installing `opendkim-tools` or `opendkim-utils`.

@@ -29,7 +29,7 @@ ENV INBOUND_DEBUGGING=
 # Install postfix first to get the first account (101)
 # Install opendkim second to get the second account (102)
 RUN        true && \
-           apk add --no-cache postfix && \
+           apk add --no-cache postfix cyrus-sasl cyrus-sasl-plain && \
            apk add --no-cache opendkim && \
            apk add --no-cache ca-certificates tzdata supervisor rsyslog && \
            apk add --no-cache --upgrade musl musl-utils && \
@@ -52,4 +52,3 @@ WORKDIR    /tmp
 
 EXPOSE     587
 CMD        ["/bin/sh", "-c", "/run.sh"]
-

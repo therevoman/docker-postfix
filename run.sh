@@ -213,7 +213,7 @@ if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type f ! -nam
 	fi
 	echo -e "        ...using socket $dkim_socket"
 
-	postconf -e "milter_protocol=2"
+	postconf -e "milter_protocol=6"
 	postconf -e "milter_default_action=accept"
 	postconf -e "smtpd_milters=$dkim_socket"
 	postconf -e "non_smtpd_milters=$dkim_socket"
@@ -241,7 +241,7 @@ if [ -d /etc/opendkim/keys ] && [ ! -z "$(find /etc/opendkim/keys -type f ! -nam
 				echo "*.$i" >> /etc/opendkim/TrustedHosts
 				echo "$i" >> /etc/opendkim/TrustedHosts
 				echo "mail._domainkey.$i $i:mail:$private_key" >> /etc/opendkim/KeyTable
-				echo "*@$i mail._domainkey.$i" > /etc/opendkim/SigningTable
+				echo "*@$i mail._domainkey.$i" >> /etc/opendkim/SigningTable
 			else
 				echo "  ...$warn skipping for domain ${emphasis}$i${reset}. File $private_key not found!"
 			fi

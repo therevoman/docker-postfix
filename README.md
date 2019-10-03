@@ -138,13 +138,21 @@ Example:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -e "MASQUERADED_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
-### `HEADER_CHECKS`
+### `SMTP_HEADER_CHECKS`
 
-Each message header line is compared against a pre-configured list of patterns. When a match is found the corresponding action is executed. The default patterns can be found in the `header_checks` file. Simply append new or delete unwanted patterns. Set to a non-empty string (usually "1" or "yes") to enable.
+This image allows you to execute Postfix [header checks](http://www.postfix.org/header_checks.5.html). Header checks allow you to execute a certain
+action when a certain MIME header is found. For example, header checks can be used prevent attaching executable files to emails.
+
+Header checks work by comparing each message header line to a pre-configured list of patterns. When a match is found the corresponding action is 
+executed. The default patterns that come with this image can be found in the `smtp_header_checks` file. Feel free to override this file in any derived
+images or, alternately, provide your own in another directory.
+
+Set `SMTP_HEADER_CHECKS` to type and location of the file to enable this feature. The sample file is uploaded into `/etc/postfix/smtp_header_checks` 
+in the image. As a convenience, setting `SMTP_HEADER_CHECKS=1` will set this to `regexp:/etc/postfix/smtp_header_checks`.
 
 Example:
 ```
-docker run --rm --name postfix -e "HEADER_CHECKS="yes" example.org" -p 1587:587 boky/postfix
+docker run --rm --name postfix -e "SMTP_HEADER_CHECKS="regexp:/etc/postfix/smtp_header_checks" -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
 ## `DKIM`

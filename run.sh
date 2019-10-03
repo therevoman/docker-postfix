@@ -44,6 +44,7 @@ fi
 info="${green}INFO:${reset}"
 notice="${yellow}NOTE:${reset}"
 warn="${orange}WARN:${reset}"
+error="${red}ERROR:${reset}"
 
 echo -e "******************************"
 echo -e "**** POSTFIX STARTING UP *****"
@@ -57,10 +58,10 @@ if [ ! -z "$TZ" ]; then
 		ln -snf "$TZ_FILE" /etc/localtime
 		echo "$TZ" > /etc/timezone
 	else
-		echo  -e "‣ $warn Cannot set timezone to: ${emphasis}$TZ${reset} -- this timezone does not exist."
+		echo -e "‣ $warn Cannot set timezone to: ${emphasis}$TZ${reset} -- this timezone does not exist."
 	fi
 else
-	echo  -e "‣ $info Not setting any timezone for the container"
+	echo -e "‣ $info Not setting any timezone for the container"
 fi
 
 # Make and reown postfix folders
@@ -182,9 +183,6 @@ if [ ! -z "$ALLOWED_SENDER_DOMAINS" ]; then
 
 	postconf -e "smtpd_restriction_classes=allowed_domains_only"
 	postconf -e "allowed_domains_only=permit_mynetworks, reject_non_fqdn_sender reject"
-#   Update: loosen up on RCPT checks. This will mean we might get some emails which are not valid, but the service connecting
-#           will be able to send out emails much faster, as there will be no lookup and lockup if the target server is not responing or available.
-#	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, reject_unverified_recipient, check_sender_access hash:$allowed_senders, reject"
 	postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:$allowed_senders, reject"
 
 	# Since we are behind closed doors, let's just permit all relays.
@@ -200,9 +198,27 @@ if [ ! -z "$MASQUERADED_DOMAINS" ]; then
 	postconf -e "local_header_rewrite_clients = static:all"
 fi
 
-if [ ! -z "$HEADER_CHECKS" ]; then
-	echo -e "‣ $notice Setting up header_checks"
-	postconf -e "smtp_header_checks=regexp:/etc/header_checks"
+if [ ! -z "$SMTP_HEADER_CHECKS" ]; then
+	if [ "$SMTP_HEADER_CHECKS" == "1" ]; then
+		echo -e "‣ $info Using default file for SMTP header checks"
+		SMTP_HEADER_CHECKS="regexp:/etc/postfix/smtp_header_checks"
+	fi
+
+	FORMAT=$(echo "$SMTP_HEADER_CHECKS" | cut -d: -f1)
+	FILE=$(echo "$SMTP_HEADER_CHECKS" | cut -d: -f2-)
+
+	if [ "$FORMAT" == "$FILE" ]; then
+		echo -e "‣ $warn No Postfix format defined for file ${emphasis}SMTP_HEADER_CHECKS${reset}. Using default ${emphasis}regexp${reset}. To avoid this message, set format explicitly, e.g. ${emphasis}SMTP_HEADER_CHECKS=regexp:$SMTP_HEADER_CHECKS${reset}."
+		FORMAT="regexp"
+	fi
+
+	if [ -f "$FILE" ]; then
+		echo -e "‣ $notice Setting up ${emphasis}smtp_header_checks${reset} to ${emphasis}$FORMAT:$FILE${reset}"
+		postconf -e "smtp_header_checks=$FORMAT:$FILE"
+	else
+		echo -e "‣ $error File ${emphasis}$FILE${reset} cannot be found. Please make sure your SMTP_HEADER_CHECKS variable points to the right file. Startup aborted."
+		exit 2
+	fi
 fi
 
 DKIM_ENABLED=

@@ -124,6 +124,8 @@ Example:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
+If you want to set the restrictions on the recipient and not on the sender (anyone can send mails but just to a single domain for instance), set `ALLOW_EMPTY_SENDER_DOMAINS` to a non-empty value (e.g. `true`) and `ALLOWED_SENDER_DOMAINS` to an empty string. Then extend this image through custom scripts to configure Postfix further.
+
 ### `INBOUND_DEBUGGING`
 
 Enable additional debugging for any connection comming from `MYNETWORKS`. Set to a non-empty string (usually "1" or "yes") to

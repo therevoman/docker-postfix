@@ -25,8 +25,16 @@ You can now send emails by using `localhost:1587` as your SMTP server address. O
 you haven't configured your `example.com` domain to allow sending from this IP (see
 [openspf](http://www.openspf.org/)), your emails will most likely be regarded as spam.
 
-All standard caveats of configuring the SMTP server apply -- e.g. you'll need to make sure your DNS
-entries are updated properly if you don't want your emails marked as spam.
+All standard caveats of configuring the SMTP server apply:
+- **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.** 
+  - Most ISPs block outgoing connections to port 25 and several companies (e.g. [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/), [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer workarounds). 
+  - Hosting centers also tend to block port 25, which can be unblocked per requirst (e.g. for AWS either [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes)
+- You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
+- If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries
+- You'll most likely need to set up (PTR)[https://en.wikipedia.org/wiki/Reverse_DNS_lookup] records to prevent your mails going to spam
+
+If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that as a consequence it's pretty difficult to host a SMTP server on a dynamic IP address.
+
 
 **Please note that the image uses the submission (587) port by default**. Port 25 is not 
 exposed on purpose, as it's regularly blocked by ISP or already occupied by other services.

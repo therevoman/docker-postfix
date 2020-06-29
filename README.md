@@ -1,10 +1,6 @@
 # docker-postfix ![Docker image](https://github.com/bokysan/docker-postfix/workflows/Docker%20image/badge.svg)
-Simple postfix relay host for your Docker containers. Based on Alpine Linux.
 
-
-## Project update
-
-**Notice, that while this commits are old, there project is not dead.** It's simply considered feature complete. You will find the latest version of the code on Dockerhub (https://hub.docker.com/r/boky/postfix). If you do have any suggestions, feel free to clone and post a merge.
+Simple postfix relay host ("postfix null client") for your Docker containers. Based on Alpine Linux.
 
 ## Description
 
@@ -17,7 +13,8 @@ This is a _server side_ POSTFIX image, geared towards emails that need to be sen
 ## TL;DR
 
 To run the container, do the following:
-```
+
+```sh
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
@@ -26,8 +23,9 @@ you haven't configured your `example.com` domain to allow sending from this IP (
 [openspf](http://www.openspf.org/)), your emails will most likely be regarded as spam.
 
 All standard caveats of configuring the SMTP server apply:
-- **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.** 
-  - Most ISPs block outgoing connections to port 25 and several companies (e.g. [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/), [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer workarounds). 
+
+- **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.**
+  - Most ISPs block outgoing connections to port 25 and several companies (e.g. [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/), [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer workarounds).
   - Hosting centers also tend to block port 25, which can be unblocked per requirst (e.g. for AWS either [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes)
 - You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
 - If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries
@@ -35,34 +33,38 @@ All standard caveats of configuring the SMTP server apply:
 
 If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that as a consequence it's pretty difficult to host a SMTP server on a dynamic IP address.
 
-
-**Please note that the image uses the submission (587) port by default**. Port 25 is not 
+**Please note that the image uses the submission (587) port by default**. Port 25 is not
 exposed on purpose, as it's regularly blocked by ISP or already occupied by other services.
-
-
 
 ## Configuration options
 
 The following configuration options are available:
-```
+
+```Dockerfile
 ENV vars
+$TZ = The timezone for the image
 $HOSTNAME = Postfix myhostname
 $RELAYHOST = Host that relays your msgs
 $RELAYHOST_USERNAME = An (optional) username for the relay server
 $RELAYHOST_PASSWORD = An (optional) login password for the relay server
+$RELAYHOST_TLS_LEVEL = Relay host TLS connection leve
 $MYNETWORKS = allow domains from per Network ( default 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 )
 $ALLOWED_SENDER_DOMAINS = domains sender domains
 $ALLOW_EMPTY_SENDER_DOMAINS = if value is set (i.e: "true"), $ALLOWED_SENDER_DOMAINS can be unset
+$MESSAGE_SIZE_LIMIT = The size of the messsage, in bytes
+$INBOUND_DEBUGGING = Set to 1 to enable detailed debugging in the logs
 $MASQUERADED_DOMAINS = domains where you want to masquerade internal hosts
-
+$DKIM_SELECTOR = override DKIM selector (by default "mail")
 ```
+
 ### `HOSTNAME`
 
 You may configure a specific hostname that the SMTP server will use to identify itself. If you don't do it,
 the default Docker host name will be used. A lot of times, this will be just the container id (e.g. `f73792d540a5`)
 which may make it difficult to track your emails in the log files. If you care about tracking at all,
 I suggest you set this variable, e.g.:
-```
+
+```sh
 docker run --rm --name postfix -e HOSTNAME=postfix-docker -p 1587:587 boky/postfix
 ```
 
@@ -73,40 +75,43 @@ you will most likely have a dedicated outgoing mail server. By setting this opti
 (hence the name) all incoming emails to the target server for actual delivery.
 
 Example:
-```
+
+```sh
 docker run --rm --name postfix -e RELAYHOST=192.168.115.215 -p 1587:587 boky/postfix
 ```
 
 You may optionally specifiy a relay port, e.g.:
-```
+
+```sh
 docker run --rm --name postfix -e RELAYHOST=192.168.115.215:587 -p 1587:587 boky/postfix
 ```
 
 Or an IPv6 address, e.g.:
-```
+
+```sh
 docker run --rm --name postfix -e 'RELAYHOST=[2001:db8::1]:587' -p 1587:587 boky/postfix
 ```
 
 If your end server requires you to authenticate with username/password, add them also:
-```
+
+```sh
 docker run --rm --name postfix -e RELAYHOST=mail.google.com -e RELAYHOST_USERNAME=hello@gmail.com -e RELAYHOST_PASSWORD=world -p 1587:587 boky/postfix
 ```
 
 ### `RELAYHOST_TLS_LEVEL`
 
-Define relay host TLS connection level. See http://www.postfix.org/postconf.5.html#smtp_tls_security_level for details. By default, the permissive level ("may") is used, which basically means "use TLS if available" and should be a sane default in most cases.
+Define relay host TLS connection level. See [smtp_tls_security_level](http://www.postfix.org/postconf.5.html#smtp_tls_security_level) for details. By default, the permissive level ("may") is used, which basically means "use TLS if available" and should be a sane default in most cases.
 
 This level defines how the postfix will connect to your upstream server.
 
 ### `MESSAGE_SIZE_LIMIT`
 
-Define the maximum size of the message, in bytes. 
-See more in [Postfix documentation](http://www.postfix.org/postconf.5.html#message_size_limit). 
+Define the maximum size of the message, in bytes.
+See more in [Postfix documentation](http://www.postfix.org/postconf.5.html#message_size_limit).
 
 By default, this limit is set to 0 (zero), which means unlimited. Why would you want to set this? Well, this is especially useful in relation
 with `RELAYHOST` setting. If your relay host has a message limit (and usually it does), set it also here. This will help you "fail fast" --
 your message will be rejected at the time of sending instead having it stuck in the outbound queue indefenetly.
-
 
 ### `MYNETWORKS`
 
@@ -118,7 +123,8 @@ Most likely you won't need to change this. However, if you need to support IPv6 
 override this setting.
 
 Example:
-```
+
+```sh
 docker run --rm --name postfix -e "MYNETWORKS=10.1.2.0/24" -p 1587:587 boky/postfix
 ```
 
@@ -128,7 +134,8 @@ Due to in-built spam protection in [Postfix](http://www.postfix.org/postconf.5.h
 sender domains -- the domains you are using to send your emails from, otherwise Postfix will refuse to start.
 
 Example:
-```
+
+```sh
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
@@ -139,13 +146,13 @@ If you want to set the restrictions on the recipient and not on the sender (anyo
 Enable additional debugging for any connection comming from `MYNETWORKS`. Set to a non-empty string (usually "1" or "yes") to
 enable debugging.
 
-
 ### `MASQUERADED_DOMAINS`
 
 If you don't want outbound mails to expose hostnames, you can use this variable to enable Postfix's [address masquerading](http://www.postfix.org/ADDRESS_REWRITING_README.html#masquerade). This can be used to do things like rewrite `lorem@ipsum.example.com` to `lorem@example.com`.
 
 Example:
-```
+
+```sh
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -e "MASQUERADED_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
@@ -154,24 +161,25 @@ docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.or
 This image allows you to execute Postfix [header checks](http://www.postfix.org/header_checks.5.html). Header checks allow you to execute a certain
 action when a certain MIME header is found. For example, header checks can be used prevent attaching executable files to emails.
 
-Header checks work by comparing each message header line to a pre-configured list of patterns. When a match is found the corresponding action is 
+Header checks work by comparing each message header line to a pre-configured list of patterns. When a match is found the corresponding action is
 executed. The default patterns that come with this image can be found in the `smtp_header_checks` file. Feel free to override this file in any derived
 images or, alternately, provide your own in another directory.
 
-Set `SMTP_HEADER_CHECKS` to type and location of the file to enable this feature. The sample file is uploaded into `/etc/postfix/smtp_header_checks` 
+Set `SMTP_HEADER_CHECKS` to type and location of the file to enable this feature. The sample file is uploaded into `/etc/postfix/smtp_header_checks`
 in the image. As a convenience, setting `SMTP_HEADER_CHECKS=1` will set this to `regexp:/etc/postfix/smtp_header_checks`.
 
 Example:
-```
+
+```sh
 docker run --rm --name postfix -e "SMTP_HEADER_CHECKS="regexp:/etc/postfix/smtp_header_checks" -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
 ## `DKIM`
 
-**This image is equiped with support for DKIM.** If you want to use DKIM you will need to generate DKIM keys yourself. 
+**This image is equiped with support for DKIM.** If you want to use DKIM you will need to generate DKIM keys yourself.
 You'll need to create a  folder for every domain you want to send through Postfix and generate they key(s) with the following command, e.g.
 
-```
+```sh
 mkdir -p /host/keys; cd /host/keys
 
 for DOMAIN in example.com example.org; do
@@ -188,11 +196,26 @@ done
 
 `opendkim-genkey` is usually in your favourite distribution provided by installing `opendkim-tools` or `opendkim-utils`.
 
-Add the created `<domain>.txt` files to your DNS records. Afterwards, just mount `/etc/opendkim/keys` into your image and DKIM 
+Add the created `<domain>.txt` files to your DNS records. Afterwards, just mount `/etc/opendkim/keys` into your image and DKIM
 will be used automatically, e.g.:
-```
+
+```sh
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -v /host/keys:/etc/opendkim/keys -p 1587:587 boky/postfix
 ```
+
+**NOTE:** `mail` is the *default DKIM selector* and should be sufficient for most usages. If you wish to override the selector,
+set the environment variable `DKIM_SELECTOR`, e.g. `... -e DKIM_SELECTOR=postfix`. Note that the same DKIM selector will be
+applied to all found domains. To override a selector for a specific domain use the syntax `[<domain>=<selector>,...]`, e.g.:
+
+```sh
+DKIM_SELECTOR=foo,example.org=postfix,example.com=blah
+```
+
+This means:
+
+- use `postfix` for `example.org` domain
+- use `blah` for `example.com` domain
+- use `foo` if no domain matches
 
 ## Extending the image
 
@@ -201,7 +224,8 @@ add your scripts to `/docker-init.db/`: All files with the `.sh` extension will 
 startup script.
 
 E.g.: create a custom `Dockerfile` like this:
-```
+
+```sh
 FROM boky/postfix
 LABEL maintainer="Jack Sparrow <jack.sparrow@theblackpearl.example.com>"
 ADD Dockerfiles/additional-config.sh /docker-init.db/
@@ -213,11 +237,11 @@ Or -- alternately -- bind this folder in your docker config and put your scripts
 to your postfix server or override configs created by the script.
 
 For example, your script could contain something like this:
-```
+
+```sh
 #!/bin/sh
 postconf -e "address_verify_negative_cache=yes"
 ```
-
 
 ## Security
 

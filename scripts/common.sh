@@ -45,3 +45,33 @@ info="${green}INFO:${reset}"
 notice="${yellow}NOTE:${reset}"
 warn="${orange}WARN:${reset}"
 error="${red}ERROR:${reset}"
+
+# Return a DKIM selector from DKIM_SELECTOR environment variable.
+# See README.md for details.
+get_dkim_selector() {
+	if [ -z "${DKIM_SELECTOR}" ]; then
+		echo "mail"
+		return
+	fi
+
+	local domain="$1"
+	local old="$IFS"
+	local no_domain_selector="mail"
+	local IFS=","
+	for part in ${DKIM_SELECTOR}; do
+		if contains "$part" "="; then
+			k="$(echo "$part" | cut -f1 -d=)"
+			v="$(echo "$part" | cut -f2 -d=)"
+			if [ "$k" == "$domain" ]; then
+				echo "$v"
+				IFS="${old}"
+				return
+			fi
+		else
+			no_domain_selector="$part"
+		fi
+	done
+	IFS="${old}"
+
+	echo "${no_domain_selector}"
+}

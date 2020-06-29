@@ -27,6 +27,8 @@ ENV ALLOW_EMPTY_SENDER_DOMAINS=
 ENV MESSAGE_SIZE_LIMIT=
 # Enable additional debugging for connections to postfix
 ENV INBOUND_DEBUGGING=
+# DKIM domain selector. If not set, the default (mail) will be used
+ENV DKIM_SELECTOR=
 
 # Install supervisor, postfix
 # Install postfix first to get the first account (101)
@@ -40,11 +42,12 @@ RUN        true && \
            (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
 
 # Set up configuration
-COPY       supervisord.conf /etc/supervisord.conf
-COPY       rsyslog.conf /etc/rsyslog.conf
-COPY       opendkim.conf /etc/opendkim/opendkim.conf
-COPY       smtp_header_checks /etc/postfix/smtp_header_checks
-COPY       commons.sh run.sh opendkim.sh /
+COPY       /configs/supervisord.conf     /etc/supervisord.conf
+COPY       /configs/rsyslog.conf         /etc/rsyslog.conf
+COPY       /configs/opendkim.conf        /etc/opendkim/opendkim.conf
+COPY       /configs/smtp_header_checks   /etc/postfix/smtp_header_checks
+COPY       /scripts/*.sh                 /
+
 RUN        chmod +x /run.sh /opendkim.sh
 
 # Set up volumes

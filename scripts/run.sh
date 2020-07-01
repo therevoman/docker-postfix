@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 . /common.sh
@@ -6,6 +6,7 @@ set -e
 
 announce_startup                    # Print startup banner
 setup_timezone                      # Check if we need to configure the container timezone
+rsyslog_log_format                  # Setup rsyslog output format
 reown_folders                       # Make and reown postfix folders
 postfix_disable_utf8                # Disable SMTPUTF8, because libraries (ICU) are missing in alpine
 postfix_create_aliases              # Update aliases database. It's not used, but postfix complains if the .db file is missing
@@ -23,6 +24,8 @@ postfix_setup_sender_domains        # Configure allowed sender domains
 postfix_setup_masquarading          # Setup masquaraded domains
 postfix_setup_header_checks         # Enable SMTP header checks, if defined
 postfix_setup_dkim                  # Configure DKIM, if enabled
+postfix_custom_commands             # Apply custom postfix settings
+opendkim_custom_commands            # Apply custom OpenDKIM settings
 postfix_open_submission_port        # Enable the submission port
 execute_post_init_scripts           # Execute any scripts found in /docker-init.db/
 

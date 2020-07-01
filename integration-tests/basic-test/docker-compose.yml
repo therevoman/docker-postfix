@@ -4,7 +4,7 @@ services:
     hostname: "postfix"
     image: "boky/postfix"
     build:
-      context: ..
+      context: ../..
     restart: always
     healthcheck:
       test: [ "CMD", "sh", "-c", "netstat -an | fgrep 587 | fgrep -q LISTEN" ]
@@ -21,7 +21,7 @@ services:
     image: "boky/postfix-integration-test"
     restart: "no"
     volumes:
-      - "..:/code"
+      - "../tester:/code"
     build:
-      context: .
-    command: "/code/integration-tests/"
+      context: ../tester
+    command: "/"

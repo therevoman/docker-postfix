@@ -219,6 +219,8 @@ This means:
 
 ## Extending the image
 
+### Using custom init scripts
+
 If you need to add custom configuration to postfix or have it do something outside of the scope of this configuration, simply
 add your scripts to `/docker-init.db/`: All files with the `.sh` extension will be executed automatically at the end of the
 startup script.
@@ -243,7 +245,37 @@ For example, your script could contain something like this:
 postconf -e "address_verify_negative_cache=yes"
 ```
 
+### Overriding specific postfix settings
+
+Any Postfix [configuration option](http://www.postfix.org/postconf.5.html) can be overriden using `POSTFIX_<name>` environment variables, e.g.
+`POSTFIX_allow_mail_to_commands=alias,forward,include`. Specifying no content (empty variable) will remove that variable from postfix config.
+
+Any OpenDKIM [configuration option](http://opendkim.org/opendkim.conf.5.html) can be overriden using `OPENDKIM_<name>` environment variables, e.g.
+`OPENDKIM_RequireSafeKeys=yes`. Specifying no content (empty variable) will remove that variable from OpenDKIM config.
+
+## Log format
+
+The image will by default output logs in human-readable (`plain`) format. If you are deploying the image to Kubernetes, it might be worth chaging
+the output format to `json` as it's more easily parsable by tools such as [Prometheus](https://prometheus.io/).
+
+To change the log format, set the (unsuprisingly named) variable `LOG_FORMAT=json`.
+
 ## Security
 
 Postfix will run the master proces as `root`, because that's how it's designed. Subprocesses will run under the `postfix` account
 which will use `UID:GID` of `100:101`. `opendkim` will run under account `102:103`.
+
+## Similar projects
+
+There are may other project offering similar functionality. The aim of this project, however, is:
+
+- to make it as simple as possible to run the relay, without going too much into postfix configuration details
+- to make as small image as possible (hence basing on Alpine linux)
+- to make the image and the corresponding code testable
+
+The other projects are, in completely random order:
+
+- [wader/postfix-relay](https://github.com/wader/postfix-relay)
+- [catatnight/postfix](https://github.com/catatnight/docker-postfix)
+- [juanluisbaptiste/docker-postfix](https://github.com/juanluisbaptiste/docker-postfix)
+- [docker-mail-relay](https://github.com/alterrebe/docker-mail-relay)

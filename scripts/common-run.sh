@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 announce_startup() {
 	echo -e "******************************"
@@ -19,6 +19,15 @@ setup_timezone() {
 	else
 		echo -e "‣ $info Not setting any timezone for the container"
 	fi
+}
+
+rsyslog_log_format() {
+	local log_format="${LOG_FORMAT}"
+	if [[ -z "${log_format}" ]]; then
+		log_format="plain"
+	fi
+	echo -e "‣ $info Using ${emphasis}${log_format}${reset} log format for rsyslog."
+	sed -i -E "s/<log-format>/${log_format}/" /etc/rsyslog.conf
 }
 
 reown_folders() {
@@ -248,6 +257,52 @@ postfix_setup_dkim() {
 		postconf -# smtpd_milters
 		postconf -# non_smtpd_milters
 	fi
+}
+
+opendkim_custom_commands() {
+	local setting
+	local key
+	local padded_key
+	local value
+	for setting in ${!OPENDKIM_*}; do
+		key="${setting:9}"
+		value="${!setting}"
+		if [ -n "${value}" ]; then
+			if [ "${#key}" -gt 23 ]; then
+				padded_key="${key} "
+			else
+				padded_key="$(printf %-24s "${key}")"
+			fi
+			if cat /etc/opendkim/opendkim.conf | egrep -q "^[[:space:]]*#?[[:space:]]*${key}"; then
+				echo -e "‣ $info Updating custom OpenDKIM setting: ${emphasis}${key}=${value}${reset}"
+				sed -i -E "s/^[ \t]*#?[ \t]*${key}[ \t]*.+$/${padded_key}${value}/" /etc/opendkim/opendkim.conf
+			else
+				echo -e "‣ $info Adding custom OpenDKIM setting: ${emphasis}${key}=${value}${reset}"
+				echo "Adding ${padded_key}${value}"
+				echo "${padded_key}${value}" >> /etc/opendkim/opendkim.conf
+			fi
+		else
+			echo -e "‣ $info Deleting custom OpenDKIM setting: ${emphasis}${key}${reset}"
+			sed -i -E "/^[ \t]*#?[ \t]*${key}[ \t]*.+$/d" /etc/opendkim/opendkim.conf
+		fi
+	done
+}
+
+postfix_custom_commands() {
+	local setting
+	local key
+	local value
+	for setting in ${!POSTFIX_*}; do
+		key="${setting:8}"
+		value="${!setting}"
+		if [ -n "${value}" ]; then
+			echo -e "‣ $info Applying custom postfix setting: ${emphasis}${key}=${value}${reset}"
+			postconf -e "${key}=${value}"
+		else
+			echo -e "‣ $info Deleting custom postfix setting: ${emphasis}${key}${reset}"
+			postconf -# "${key}"
+		fi
+	done
 }
 
 postfix_open_submission_port() {

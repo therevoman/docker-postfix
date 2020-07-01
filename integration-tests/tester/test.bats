@@ -12,7 +12,6 @@ if [ -z "$TO" ]; then
 fi
 
 # Wait for postfix to startup
-echo "Waiting for startup..."
 wait-for-service -q tcp://postfix_test_587:587
 
 SMTP_DATA="-smtp postfix_test_587 -port 587"

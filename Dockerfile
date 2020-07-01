@@ -29,6 +29,8 @@ ENV MESSAGE_SIZE_LIMIT=
 ENV INBOUND_DEBUGGING=
 # DKIM domain selector. If not set, the default (mail) will be used
 ENV DKIM_SELECTOR=
+# Logformat. Defaults to "plain". Can be either "plain" or "json".
+ENV LOG_FORMAT=
 
 # Install supervisor, postfix
 # Install postfix first to get the first account (101)
@@ -37,13 +39,12 @@ RUN        true && \
            apk add --no-cache --upgrade cyrus-sasl cyrus-sasl-plain cyrus-sasl-login && \
            apk add --no-cache postfix && \
            apk add --no-cache opendkim && \
-           apk add --no-cache ca-certificates tzdata supervisor rsyslog && \
-           apk add --no-cache --upgrade musl musl-utils && \
+           apk add --no-cache --upgrade ca-certificates tzdata supervisor rsyslog musl musl-utils bash && \
            (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
 
 # Set up configuration
 COPY       /configs/supervisord.conf     /etc/supervisord.conf
-COPY       /configs/rsyslog.conf         /etc/rsyslog.conf
+COPY       /configs/rsyslog*.conf        /etc/
 COPY       /configs/opendkim.conf        /etc/opendkim/opendkim.conf
 COPY       /configs/smtp_header_checks   /etc/postfix/smtp_header_checks
 COPY       /scripts/*.sh                 /

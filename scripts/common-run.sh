@@ -166,8 +166,6 @@ postfix_setup_sender_domains() {
 		echo
 		postmap $allowed_senders
 
-		postconf -e "smtpd_restriction_classes=allowed_domains_only"
-		postconf -e "allowed_domains_only=permit_mynetworks, reject_non_fqdn_sender reject"
 		postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:$allowed_senders, reject"
 
 		# Since we are behind closed doors, let's just permit all relays.

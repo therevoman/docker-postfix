@@ -37,3 +37,17 @@ SMTP_DATA="-smtp postfix_test_587 -port 587"
 		attach \
 			-file "/usr/local/bin/mailsend"
 }
+
+@test "Send mail from non-supported sender" {
+	if [[ "$SKIP_INVALID_DOMAIN_SEND" == "1" ]]; then
+		skip
+	fi
+
+	if mailsend \
+		-sub "Test email 1" $SMTP_DATA \
+			-from "test@gmail.com" -to "$TO" \
+		body \
+			-msg "Hello world!\nThis is a simple test message!"; then
+		return 1
+	fi
+}

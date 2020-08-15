@@ -29,5 +29,5 @@ opendkim_custom_commands            # Apply custom OpenDKIM settings
 postfix_open_submission_port        # Enable the submission port
 execute_post_init_scripts           # Execute any scripts found in /docker-init.db/
 
-notice " Starting: ${emphasis}rsyslog${reset}, ${emphasis}postfix${reset}$DKIM_ENABLED"
+notice "Starting: ${emphasis}rsyslog${reset}, ${emphasis}postfix${reset}$DKIM_ENABLED"
 exec supervisord -c /etc/supervisord.conf

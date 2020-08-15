@@ -171,7 +171,7 @@ postfix_setup_sender_domains() {
 		# Since we are behind closed doors, let's just permit all relays.
 		postconf -e "smtpd_relay_restrictions=permit"
 	elif [ -z "$ALLOW_EMPTY_SENDER_DOMAINS" ]; then
-		echo -e "ERROR: You need to specify ALLOWED_SENDER_DOMAINS otherwise Postfix will not run!"
+		error "You need to specify ALLOWED_SENDER_DOMAINS otherwise Postfix will not run!"
 		exit 1
 	fi
 }

@@ -70,7 +70,7 @@ The following configuration options are available
   the server auto-generate domain keys.
 - `OPENDKIM_<any_dkim_setting>` = Provide any additonal OpenDKIM setting.
 
-### `POSTFIX_hostname`
+### `POSTFIX_myhostname`
 
 You may configure a specific hostname that the SMTP server will use to identify itself. If you don't do it,
 the default Docker host name will be used. A lot of times, this will be just the container id (e.g. `f73792d540a5`)
@@ -78,7 +78,7 @@ which may make it difficult to track your emails in the log files. If you care a
 I suggest you set this variable, e.g.:
 
 ```sh
-docker run --rm --name postfix -e HOSTNAME=postfix-docker -p 1587:587 boky/postfix
+docker run --rm --name postfix -e POSTFIX_myhostname=postfix-docker -p 1587:587 boky/postfix
 ```
 
 ### `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD`

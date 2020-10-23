@@ -18,7 +18,8 @@ declare reset green yellow orange orange_emphasis lightblue red gray emphasis un
 #
 ##################################################################################
 contains() {
-	string="$1"    substring="$2"
+	string="$1"
+	substring="$2"
 	if test "${string#*$substring}" != "$string"; then return 0; else return 1; fi
 }
 
@@ -26,7 +27,7 @@ contains() {
 # Check if we're running on a color term or not and setup color codes appropriately
 ##################################################################################
 is_color_term() {
-	if test -t 1 || [ -n "$FORCE_COLOR" ]; then
+	if test -t 1 || [[ -n "$FORCE_COLOR" ]]; then
 		# Quick and dirty test for color support
 		if [ "$FORCE_COLOR" == "256" ] || contains "$TERM" "256" || contains "$COLORTERM" "256"  || contains "$COLORTERM" "color" || contains "$COLORTERM" "24bit"; then
 			reset="$(printf '\033[0m')"
@@ -109,7 +110,7 @@ fatal() {
 # Return a DKIM selector from DKIM_SELECTOR environment variable.
 # See README.md for details.
 get_dkim_selector() {
-	if [ -z "${DKIM_SELECTOR}" ]; then
+	if [[ -z "${DKIM_SELECTOR}" ]]; then
 		echo "mail"
 		return
 	fi
@@ -134,6 +135,40 @@ get_dkim_selector() {
 	IFS="${old}"
 
 	echo "${no_domain_selector}"
+}
+
+do_postconf() {
+	local is_clear
+	local has_commented_key
+	local has_key
+	local key
+	if [[ "$1" == "-#" ]]; then
+		is_clear=1
+		shift
+		key="$1"
+		shift
+		if grep -E "^${key}\s*=" /etc/postfix/main.cf; then
+			has_key="1"
+		fi
+		if grep -E "^#\s*${key}\s*=" /etc/postfix/main.cf; then
+			has_commented_key="1"
+		fi
+		if [[ "${has_key}" == "1" ]] && [[ "${has_commented_key}" == "1" ]]; then
+			# The key appears in the comment as well as outside the comment.
+			# Delete the key which is outside of the comment
+			sed -i -e "/^${key}\s*=/ { :a; N; /^\s/ba; N; d }" /etc/postfix/main.cf
+		elif [[ "${has_key}" == "1" ]]; then
+			# Comment out the key with postconf
+			postconf -# "${key}"
+		else
+			# No key or only commented key, do nothing
+			:
+		fi
+	else
+		# Add the line normally
+		postconf $@
+	fi
+
 }
 
 export reset green yellow orange orange_emphasis lightblue red gray emphasis underline

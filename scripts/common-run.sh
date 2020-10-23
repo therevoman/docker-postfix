@@ -232,7 +232,7 @@ postfix_setup_dkim() {
 			for domain in ${ALLOWED_SENDER_DOMAINS}; do
 				private_key=/etc/opendkim/keys/${domain}.private
 				if [[ -f "${private_key}" ]]; then
-					info "Key for domain ${emphasis}${domain}${reset} already exists in ${emphasis}${private_key}${reset}. Will not overwrite"
+					info "Key for domain ${emphasis}${domain}${reset} already exists in ${emphasis}${private_key}${reset}. Will not overwrite."
 				else
 					notice "Auto-generating DKIM key for ${emphasis}${domain}${reset} into ${private_key}."
 					(
@@ -243,6 +243,14 @@ postfix_setup_dkim() {
 						sed -i 's/h=rsa-sha256/h=sha256/' ${domain_dkim_selector}.txt
 						mv -v ${domain_dkim_selector}.private /etc/opendkim/keys/${domain}.private
 						mv -v ${domain_dkim_selector}.txt /etc/opendkim/keys/${domain}.txt
+
+						# Fixes #39
+						chown opendkim:opendkim /etc/opendkim/keys/${domain}.private
+						chmod 444 /etc/opendkim/keys/${domain}.private
+
+						chown opendkim:opendkim /etc/opendkim/keys/${domain}.txt
+						chmod 644 /etc/opendkim/keys/${domain}.txt
+
 					) | sed 's/^/       /'
 					any_generated=1
 				fi

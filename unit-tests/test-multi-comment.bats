@@ -3,21 +3,29 @@
 load /code/scripts/common.sh
 load /code/scripts/common-run.sh
 
+if [[ ! -f /etc/postfix/main.test-multi-comment ]]; then
+	cp /etc/postfix/main.cf /etc/postfix/main.test-multi-comment
+fi
+
 @test "make sure #myhostname appears four times in main.cf (default)" {
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
-	[ "$result" == "4" ]
+	[[ "$result" -gt 1 ]]
 }
 
 @test "make sure commenting out #myhostname does not incrase count" {
+	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -# myhostname
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
-	[ "$result" == "4" ]
+	[ "$result" == "$COMMENT_COUNT" ]
 }
 
 @test "make sure adding myhostname does not incrase count" {
+	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -e myhostname=localhost
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
-	[ "$result" == "4" ]
+	echo "result=$result"
+	echo "COMMENT_COUNT=$COMMENT_COUNT"
+	[ "$result" == "$COMMENT_COUNT" ]
 }
 
 @test "make sure adding myhostname is added only once" {
@@ -27,9 +35,10 @@ load /code/scripts/common-run.sh
 }
 
 @test "make sure deleting myhostname does not incrase count" {
+	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -# myhostname
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
-	[ "$result" == "4" ]
+	[ "$result" == "$COMMENT_COUNT" ]
 }
 
 @test "no sasl password duplications" {

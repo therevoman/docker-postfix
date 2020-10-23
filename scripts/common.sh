@@ -147,10 +147,10 @@ do_postconf() {
 		shift
 		key="$1"
 		shift
-		if grep -E "^${key}\s*=" /etc/postfix/main.cf; then
+		if grep -q -E "^${key}\s*=" /etc/postfix/main.cf; then
 			has_key="1"
 		fi
-		if grep -E "^#\s*${key}\s*=" /etc/postfix/main.cf; then
+		if grep -q -E "^#\s*${key}\s*=" /etc/postfix/main.cf; then
 			has_commented_key="1"
 		fi
 		if [[ "${has_key}" == "1" ]] && [[ "${has_commented_key}" == "1" ]]; then
@@ -159,14 +159,15 @@ do_postconf() {
 			sed -i -e "/^${key}\s*=/ { :a; N; /^\s/ba; N; d }" /etc/postfix/main.cf
 		elif [[ "${has_key}" == "1" ]]; then
 			# Comment out the key with postconf
-			postconf -# "${key}"
+			postconf -# "${key}" > /dev/null
 		else
 			# No key or only commented key, do nothing
 			:
 		fi
 	else
 		# Add the line normally
-		postconf $@
+		shift
+		postconf -e "$@"
 	fi
 
 }

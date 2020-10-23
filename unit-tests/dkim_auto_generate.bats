@@ -15,6 +15,8 @@ chown -R opendkim:opendkim /etc/opendkim
     local ALLOWED_SENDER_DOMAINS=example.org
     postfix_setup_dkim
 
+    postfix check
+
     su opendkim -s /bin/bash -c 'cat /etc/opendkim/keys/example.org.private' > /dev/null
     su opendkim -s /bin/bash -c 'cat /etc/opendkim/keys/example.org.txt' > /dev/null
 }

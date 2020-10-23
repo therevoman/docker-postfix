@@ -15,6 +15,7 @@ fi
 @test "make sure commenting out #myhostname does not incrase count" {
 	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -# myhostname
+	postfix check
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
 	[ "$result" == "$COMMENT_COUNT" ]
 }
@@ -22,14 +23,14 @@ fi
 @test "make sure adding myhostname does not incrase count" {
 	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -e myhostname=localhost
+	postfix check
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
-	echo "result=$result"
-	echo "COMMENT_COUNT=$COMMENT_COUNT"
 	[ "$result" == "$COMMENT_COUNT" ]
 }
 
 @test "make sure adding myhostname is added only once" {
 	do_postconf -e myhostname=localhost
+	postfix check
 	result=$(grep -E "^myhostname" /etc/postfix/main.cf | wc -l)
 	[ "$result" == "1" ]
 }
@@ -37,8 +38,21 @@ fi
 @test "make sure deleting myhostname does not incrase count" {
 	COMMENT_COUNT=$(grep -E "^#myhostname" /etc/postfix/main.test-multi-comment | wc -l)
 	do_postconf -# myhostname
+	postfix check
 	result=$(grep -E "^#myhostname" /etc/postfix/main.cf | wc -l)
 	[ "$result" == "$COMMENT_COUNT" ]
+}
+
+@test "test removing relayhost" {
+	do_postconf -# relayhost
+	grep -q -E "^#relayhost" /etc/postfix/main.cf
+	! grep -q -E "^relayhost" /etc/postfix/main.cf
+	postfix check
+}
+
+@test "spaces in parameters" {
+	do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:example.org, reject"
+	postfix check
 }
 
 @test "no sasl password duplications" {
@@ -48,6 +62,8 @@ fi
 
 	postfix_setup_relayhost
 	postfix_setup_relayhost
+
+	postfix check
 
 	result=$(grep -E "^demo" /etc/postfix/sasl_passwd | wc -l)
 	[ "$result" == "1" ]

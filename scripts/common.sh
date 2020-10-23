@@ -18,41 +18,40 @@ declare reset green yellow orange orange_emphasis lightblue red gray emphasis un
 #
 ##################################################################################
 contains() {
-    string="$1"
-    substring="$2"
-    if test "${string#*$substring}" != "$string"; then return 0; else return 1; fi
+	string="$1"    substring="$2"
+	if test "${string#*$substring}" != "$string"; then return 0; else return 1; fi
 }
 
 ##################################################################################
 # Check if we're running on a color term or not and setup color codes appropriately
 ##################################################################################
 is_color_term() {
-    if test -t 1 || [ -n "$FORCE_COLOR" ]; then
-        # Quick and dirty test for color support
-        if [ "$FORCE_COLOR" == "256" ] || contains "$TERM" "256" || contains "$COLORTERM" "256"  || contains "$COLORTERM" "color" || contains "$COLORTERM" "24bit"; then
-            reset="$(printf '\033[0m')"
-            green="$(printf '\033[38;5;46m')"
-            yellow="$(printf '\033[38;5;178m')"
-            orange="$(printf '\033[38;5;208m')"
-            orange_emphasis="$(printf '\033[38;5;220m')"
-            lightblue="$(printf '\033[38;5;147m')"
-            red="$(printf '\033[91m')"
-            gray="$(printf '\033[38;5;245m')"
-            emphasis="$(printf '\033[38;5;111m')"
-            underline="$(printf '\033[4m')"
-        elif [ -n "$FORCE_COLOR" ] || contains "$TERM" "xterm"; then
-            reset="$(printf '\033[0m')"
-            green="$(printf '\033[32m')"
-            yellow="$(printf '\033[33m')"
-            orange="$(printf '\033[31m')"
-            orange_emphasis="$(printf '\033[31m\033[1m')"
-            lightblue="$(printf '\033[36;1m')"
-            red="$(printf '\033[31;1m')"
-            gray="$(printf '\033[30;1m')"
-            emphasis="$(printf '\033[1m')"
-            underline="$(printf '\033[4m')"
-        fi
-    fi
+	if test -t 1 || [ -n "$FORCE_COLOR" ]; then
+		# Quick and dirty test for color support
+		if [ "$FORCE_COLOR" == "256" ] || contains "$TERM" "256" || contains "$COLORTERM" "256"  || contains "$COLORTERM" "color" || contains "$COLORTERM" "24bit"; then
+			reset="$(printf '\033[0m')"
+			green="$(printf '\033[38;5;46m')"
+			yellow="$(printf '\033[38;5;178m')"
+			orange="$(printf '\033[38;5;208m')"
+			orange_emphasis="$(printf '\033[38;5;220m')"
+			lightblue="$(printf '\033[38;5;147m')"
+			red="$(printf '\033[91m')"
+			gray="$(printf '\033[38;5;245m')"
+			emphasis="$(printf '\033[38;5;111m')"
+			underline="$(printf '\033[4m')"
+		elif [ -n "$FORCE_COLOR" ] || contains "$TERM" "xterm"; then
+			reset="$(printf '\033[0m')"
+			green="$(printf '\033[32m')"
+			yellow="$(printf '\033[33m')"
+			orange="$(printf '\033[31m')"
+			orange_emphasis="$(printf '\033[31m\033[1m')"
+			lightblue="$(printf '\033[36;1m')"
+			red="$(printf '\033[31;1m')"
+			gray="$(printf '\033[30;1m')"
+			emphasis="$(printf '\033[1m')"
+			underline="$(printf '\033[4m')"
+		fi
+	fi
 }
 is_color_term
 

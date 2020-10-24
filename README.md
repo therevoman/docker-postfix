@@ -63,17 +63,25 @@ you haven't configured your `example.com` domain to allow sending from this IP (
 
 All standard caveats of configuring the SMTP server apply:
 
-- **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.**
-  - Most ISPs block outgoing connections to port 25 and several companies (e.g. [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/), [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer workarounds).
-  - Hosting centers also tend to block port 25, which can be unblocked per request (e.g. for AWS either [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes)
-- You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
-- If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries
-- You'll most likely need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your mails going to spam
+* **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.**
+  * Most ISPs block outgoing connections to port 25 and several companies (e.g.
+    [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/),
+    [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer
+    workarounds).
+  * Hosting centers also tend to block port 25, which can be unblocked per requirst (e.g. for AWS either
+    [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to
+    their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes).
+* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or
+  [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
+* If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries.
+* You'll most likely need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your
+  mails going to spam.
 
-If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that as a consequence it's pretty difficult to host a SMTP server on a dynamic IP address.
+If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that as a
+consequence it's pretty difficult to host a SMTP server on a dynamic IP address.
 
-**Please note that the image uses the submission (587) port by default**. Port 25 is not
-exposed on purpose, as it's regularly blocked by ISP or already occupied by other services.
+**Please note that the image uses the submission (587) port by default**. Port 25 is not exposed on purpose, as it's
+regularly blocked by ISP or already occupied by other services.
 
 ## Configuration options
 
@@ -118,40 +126,18 @@ To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=js
 
 ### Postfix-specific options
 
-- `RELAYHOST` = Host that relays your messages
-- `RELAYHOST_USERNAME` = An (optional) username for the relay server
-- `RELAYHOST_PASSWORD` = An (optional) login password for the relay server
-- `RELAYHOST_TLS_LEVEL` = Relay host TLS connection leve
-- `POSTFIX_message_size_limit` = The maximum size of the messsage, in bytes, by default it's unlimited
-- `POSTFIX_mynetworks` = Allow sending mails only from specific networks ( default `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` )
-- `POSTFIX_myhostname` = Set the name of this postfix server
-- `MASQUERADED_DOMAINS` = domains where you want to masquerade internal hosts
-- `SMTP_HEADER_CHECKS`= Set to `1` to enable header checks of to a location
-   of the file for header checks
-- `POSTFIX_hostname` = Set tha name of this postfix server
-- `POSTFIX_mynetworks` = Allow sending mails only from specific networks ( default `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` )
-- `POSTFIX_message_size_limit` = The maximum size of the messsage, in bytes, by default it's unlimited
-- `POSTFIX_<any_postfix_setting>` = provide any additional postfix setting
+* `RELAYHOST` = Host that relays your messages
+* `RELAYHOST_USERNAME` = An (optional) username for the relay server
+* `RELAYHOST_PASSWORD` = An (optional) login password for the relay server
+* `RELAYHOST_TLS_LEVEL` = Relay host TLS connection leve
+* `MASQUERADED_DOMAINS` = domains where you want to masquerade internal hosts
+* `SMTP_HEADER_CHECKS`= Set to `1` to enable header checks of to a location of the file for header checks
+* `POSTFIX_hostname` = Set tha name of this postfix server
+* `POSTFIX_mynetworks` = Allow sending mails only from specific networks ( default `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` )
+* `POSTFIX_message_size_limit` = The maximum size of the messsage, in bytes, by default it's unlimited
+* `POSTFIX_<any_postfix_setting>` = provide any additional postfix setting
 
-### DKIM-specific options
-
-- `DKIM_SELECTOR` = Override the default DKIM selector (by default "mail").
-- `DKIM_AUTOGENERATE` = Set to non-empty value (e.g. `true` or `1`) to have
-  the server auto-generate domain keys.
-- `OPENDKIM_<any_dkim_setting>` = Provide any additonal OpenDKIM setting.
-
-### `POSTFIX_myhostname`
-
-You may configure a specific hostname that the SMTP server will use to identify itself. If you don't do it,
-the default Docker host name will be used. A lot of times, this will be just the container id (e.g. `f73792d540a5`)
-which may make it difficult to track your emails in the log files. If you care about tracking at all,
-I suggest you set this variable, e.g.:
-
-```sh
-docker run --rm --name postfix -e POSTFIX_myhostname=postfix-docker -p 1587:587 boky/postfix
-```
-
-### `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD`
+#### `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD`
 
 Postfix will try to deliver emails directly to the target server. If you are behind a firewall, or inside a corporation
 you will most likely have a dedicated outgoing mail server. By setting this option, you will instruct postfix to relay
@@ -397,17 +383,6 @@ Google Apps allows third-party services to use Google's SMTP servers without muc
 can configure Gmail to accept your messages. You can then send email *from any address within your domain*.
 
 You need to enable the [SMTP relay service](https://support.google.com/a/answer/2956491?hl=en):
-- Go to Google [Admin /Apps / G Suite / Gmail /Advanced settings](https://admin.google.com/AdminHome?hl=en_GB#ServiceSettings/service=email&subtab=filters).
-- Find the **Routing / SMTP relay service**
-- Click **Add another** button that pops up when you hover over the line
-- Enter the name and your server's external IP as shown in the picture below:
-    - **Allowed senders:** Only registered Apps users in my domains
-    - Select **Only accept mail from specified IP Addresses**
-    - Click **Add IP RANGE** and add your external IP
-    - Make sure **Require SMTP Authentication** is **NOT** selected
-    - You *may* select **Require TLS encryption**
-
-![Add setting SMTP relay service](GApps-SMTP-config.png)
 
 * Go to Google [Admin /Apps / G Suite / Gmail /Advanced settings](https://admin.google.com/AdminHome?hl=en_GB#ServiceSettings/service=email&subtab=filters).
 * Find the **Routing / SMTP relay service**
@@ -434,11 +409,10 @@ There's no need to configure DKIM or SPF, as Gmail will add these headers automa
 
 If you're sending messages directly, you'll need to:
 
-- need to have a fixed IP address;
-- configure a reverse PTR record;
-- configure SPF and/or DKIM as explained in this document;
-- it's also highly advisable to have your own IP block.
-
+* need to have a fixed IP address;
+* configure a reverse PTR record;
+* configure SPF and/or DKIM as explained in this document;
+* it's also highly advisable to have your own IP block.
 
 Your configuration would be as follows:
 

@@ -4,38 +4,38 @@ Simple postfix relay host ("postfix null client") for your Docker containers. Ba
 
 ## Table of contents
 
-  * [Table of contents](#table-of-contents)
-  * [Description](#description)
-  * [TL;DR](#tldr)
-  * [Configuration options](#configuration-options)
-     * [General options](#general-options)
-        * [Inbound debugging](#inbound-debugging)
-        * [ALLOWED_SENDER_DOMAINS and ALLOW_EMPTY_SENDER_DOMAINS](#allowed_sender_domains-and-allow_empty_sender_domains)
-        * [Log format](#log-format)
-     * [Postfix-specific options](#postfix-specific-options)
-        * [RELAYHOST, RELAYHOST_USERNAME and RELAYHOST_PASSWORD](#relayhost-relayhost_username-and-relayhost_password)
-        * [RELAYHOST_TLS_LEVEL](#relayhost_tls_level)
-        * [MASQUERADED_DOMAINS](#masqueraded_domains)
-        * [SMTP_HEADER_CHECKS](#smtp_header_checks)
-        * [POSTFIX_hostname](#postfix_hostname)
-        * [POSTFIX_mynetworks](#postfix_mynetworks)
-        * [POSTFIX_message_size_limit](#postfix_message_size_limit)
-        * [Overriding specific postfix settings](#overriding-specific-postfix-settings)
-     * [DKIM / DomainKeys](#dkim--domainkeys)
-        * [Supplying your own DKIM keys](#supplying-your-own-dkim-keys)
-        * [Auto-generating the DKIM selectors through the image](#auto-generating-the-dkim-selectors-through-the-image)
-        * [Changing the DKIM selector](#changing-the-dkim-selector)
-        * [Overriding specific OpenDKIM settings](#overriding-specific-opendkim-settings)
-        * [Verifying your DKIM setup](#verifying-your-dkim-setup)
-  * [Extending the image](#extending-the-image)
-     * [Using custom init scripts](#using-custom-init-scripts)
-  * [Security](#security)
-  * [Quick how-tos](#quick-how-tos)
-     * [Relaying messages through your Gmail account](#relaying-messages-through-your-gmail-account)
-     * [Relaying messages through Google Apps account](#relaying-messages-through-google-apps-account)
-     * [Sending messages directly](#sending-messages-directly)
-  * [Similar projects](#similar-projects)
-  * [License check](#license-check)
+* [Table of contents](#table-of-contents)
+* [Description](#description)
+* [TL;DR](#tldr)
+* [Configuration options](#configuration-options)
+  * [General options](#general-options)
+    * [Inbound debugging](#inbound-debugging)
+    * [ALLOWED_SENDER_DOMAINS and ALLOW_EMPTY_SENDER_DOMAINS](#allowed_sender_domains-and-allow_empty_sender_domains)
+    * [Log format](#log-format)
+  * [Postfix-specific options](#postfix-specific-options)
+    * [RELAYHOST, RELAYHOST_USERNAME and RELAYHOST_PASSWORD](#relayhost-relayhost_username-and-relayhost_password)
+    * [RELAYHOST_TLS_LEVEL](#relayhost_tls_level)
+    * [MASQUERADED_DOMAINS](#masqueraded_domains)
+    * [SMTP_HEADER_CHECKS](#smtp_header_checks)
+    * [POSTFIX_hostname](#postfix_hostname)
+    * [POSTFIX_mynetworks](#postfix_mynetworks)
+    * [POSTFIX_message_size_limit](#postfix_message_size_limit)
+    * [Overriding specific postfix settings](#overriding-specific-postfix-settings)
+  * [DKIM / DomainKeys](#dkim--domainkeys)
+    * [Supplying your own DKIM keys](#supplying-your-own-dkim-keys)
+    * [Auto-generating the DKIM selectors through the image](#auto-generating-the-dkim-selectors-through-the-image)
+    * [Changing the DKIM selector](#changing-the-dkim-selector)
+    * [Overriding specific OpenDKIM settings](#overriding-specific-opendkim-settings)
+    * [Verifying your DKIM setup](#verifying-your-dkim-setup)
+* [Extending the image](#extending-the-image)
+  * [Using custom init scripts](#using-custom-init-scripts)
+* [Security](#security)
+* [Quick how-tos](#quick-how-tos)
+  * [Relaying messages through your Gmail account](#relaying-messages-through-your-gmail-account)
+  * [Relaying messages through Google Apps account](#relaying-messages-through-google-apps-account)
+  * [Sending messages directly](#sending-messages-directly)
+* [Similar projects](#similar-projects)
+* [License check](#license-check)
 
 ## Description
 
@@ -81,12 +81,12 @@ The following configuration options are available
 
 ### General options
 
-- `TZ` = The timezone for the image
-- `FORCE_COLOR` = Set to `1` to force color output (otherwise auto-detected)
-- `INBOUND_DEBUGGING` = Set to `1` to enable detailed debugging in the logs
-- `ALLOWED_SENDER_DOMAINS` = domains which are allowed to send email via this server
-- `ALLOW_EMPTY_SENDER_DOMAINS` = if value is set (i.e: `true`), `ALLOWED_SENDER_DOMAINS` can be unset
-- `LOG_FORMAT` = Set your log format (JSON or plain)
+* `TZ` = The timezone for the image
+* `FORCE_COLOR` = Set to `1` to force color output (otherwise auto-detected)
+* `INBOUND_DEBUGGING` = Set to `1` to enable detailed debugging in the logs
+* `ALLOWED_SENDER_DOMAINS` = domains which are allowed to send email via this server
+* `ALLOW_EMPTY_SENDER_DOMAINS` = if value is set (i.e: `true`), `ALLOWED_SENDER_DOMAINS` can be unset
+* `LOG_FORMAT` = Set your log format (JSON or plain)
 
 #### Inbound debugging
 
@@ -115,7 +115,6 @@ it might be worth chaging the output format to `json` as it's more easily parsab
 [Prometheus](https://prometheus.io/).
 
 To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=json`.
-
 
 ### Postfix-specific options
 
@@ -269,10 +268,10 @@ be either generated automatically, or you can supply them yourself.
 
 The DKIM supports the following options:
 
-- `DKIM_SELECTOR` = Override the default DKIM selector (by default "mail").
-- `DKIM_AUTOGENERATE` = Set to non-empty value (e.g. `true` or `1`) to have
+* `DKIM_SELECTOR` = Override the default DKIM selector (by default "mail").
+* `DKIM_AUTOGENERATE` = Set to non-empty value (e.g. `true` or `1`) to have
   the server auto-generate domain keys.
-- `OPENDKIM_<any_dkim_setting>` = Provide any additional OpenDKIM setting.
+* `OPENDKIM_<any_dkim_setting>` = Provide any additional OpenDKIM setting.
 
 #### Supplying your own DKIM keys
 
@@ -325,9 +324,9 @@ DKIM_SELECTOR=foo,example.org=postfix,example.com=blah
 
 This means:
 
-- use `postfix` for `example.org` domain
-- use `blah` for `example.com` domain
-- use `foo` if no domain matches
+* use `postfix` for `example.org` domain
+* use `blah` for `example.com` domain
+* use `foo` if no domain matches
 
 #### Overriding specific OpenDKIM settings
 
@@ -410,6 +409,17 @@ You need to enable the [SMTP relay service](https://support.google.com/a/answer/
 
 ![Add setting SMTP relay service](GApps-SMTP-config.png)
 
+* Go to Google [Admin /Apps / G Suite / Gmail /Advanced settings](https://admin.google.com/AdminHome?hl=en_GB#ServiceSettings/service=email&subtab=filters).
+* Find the **Routing / SMTP relay service**
+* Click **Add another** button that pops up when you hover over the line
+* Enter the name and your server's external IP as shown in the picture below:
+  * **Allowed senders:** Only registered Apps users in my domains
+  * Select **Only accept mail from specified IP Addresses**
+  * Click **Add IP RANGE** and add your external IP
+  * Make sure **Require SMTP Authentication** is **NOT** selected
+  * You *may* select **Require TLS encryption**
+
+![Add setting SMTP relay service](GApps-SMTP-config.png)
 
 Your configuration would be as follows:
 
@@ -440,16 +450,16 @@ ALLOWED_SENDER_DOMAINS=<your-domain>
 
 There are may other project offering similar functionality. The aim of this project, however, is:
 
-- to make it as simple as possible to run the relay, without going too much into postfix configuration details
-- to make the image as small as possible (hence basing on Alpine linux)
-- to make the image and the corresponding code testable
+* to make it as simple as possible to run the relay, without going too much into postfix configuration details
+* to make the image as small as possible (hence basing on Alpine linux)
+* to make the image and the corresponding code testable
 
 The other projects are, in completely random order:
 
-- [wader/postfix-relay](https://github.com/wader/postfix-relay)
-- [catatnight/postfix](https://github.com/catatnight/docker-postfix)
-- [juanluisbaptiste/docker-postfix](https://github.com/juanluisbaptiste/docker-postfix)
-- [docker-mail-relay](https://github.com/alterrebe/docker-mail-relay)
+* [wader/postfix-relay](https://github.com/wader/postfix-relay)
+* [catatnight/postfix](https://github.com/catatnight/docker-postfix)
+* [juanluisbaptiste/docker-postfix](https://github.com/juanluisbaptiste/docker-postfix)
+* [docker-mail-relay](https://github.com/alterrebe/docker-mail-relay)
 
 ## License check
 

@@ -71,8 +71,12 @@ postfix_restrict_message_size() {
 postfix_reject_invalid_helos() {
 	do_postconf -e smtpd_delay_reject=yes
 	do_postconf -e smtpd_helo_required=yes
+	# Fast reject -- reject straight away when the client is connecting
+	do_postconf -e "smtpd_client_restrictions=permit_mynetworks,reject"
+	# Reject / accept on EHLO / HELO command
 	do_postconf -e "smtpd_helo_restrictions=permit_mynetworks,reject_invalid_helo_hostname,permit"
-	do_postconf -e "smtpd_sender_restrictions=permit_mynetworks"
+	# Delayed reject -- reject on MAIL FROM command. Not strictly neccessary to have both, but doesn't hurt
+	do_postconf -e "smtpd_sender_restrictions=permit_mynetworks,reject"
 }
 
 postfix_set_hostname() {

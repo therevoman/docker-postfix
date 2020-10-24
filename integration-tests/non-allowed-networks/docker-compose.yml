@@ -15,16 +15,18 @@ services:
     environment:
       FORCE_COLOR: "1"
       ALLOWED_SENDER_DOMAINS: "example.org"
-      DKIM_AUTOGENERATE: "true"
+      POSTFIX_mynetworks: "1.1.1.1/32"
       POSTFIX_smtpd_end_of_data_restrictions: "check_client_access static:discard"
+      LOG_FORMAT: "json"
   tests:
     image: "boky/postfix-integration-test"
     restart: "no"
     volumes:
-      - "../tester:/code"
+      - ".:/code"
     build:
       context: ../tester
-    command: "/" # relative path to /code
+    command: "/"
     environment:
       FROM: "demo@example.org"
       TO: "test@gmail.com"
+      SKIP_INVALID_DOMAIN_SEND: "1"

@@ -25,7 +25,7 @@ services:
       - "../tester:/code"
     build:
       context: ../tester
-    command: "/"
+    command: "/" # relative path to /code
     environment:
       FROM: "demo@example.org"
       TO: "test@gmail.com"

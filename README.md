@@ -405,6 +405,31 @@ ALLOWED_SENDER_DOMAINS=<your-domain>
 
 There's no need to configure DKIM or SPF, as Gmail will add these headers automatically.
 
+### Relaying messages through Amazon's SES
+
+If your application runs in Amazon Elastic Compute Cloud (Amazon EC2), you can use Amazon SES to send 62,000 emails
+every month at no additional charge. You'll need an AWS account and SMTP credentials. The SMTP settings are available
+on the SES page. For example, for `eu-central-1`:
+
+* the SES page [is available here](https://eu-central-1.console.aws.amazon.com/ses/home?region=eu-central-1#smtp-settings)
+* [create the user/credentials](https://console.aws.amazon.com/iam/home?#s=SESHomeV4/eu-central-1). **Make sure
+  you write them down, as you will only see them once.**
+
+By default, messages that you send through Amazon SES use a subdomain of amazonses.com as the MAIL FROM domain. See
+[Amazon's documentation](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/mail-from.html) on how the domain can
+be configured.
+
+Your configuration would be as follows (example data):
+
+```shell script
+RELAYHOST=email-smtp.eu-central-1.amazonaws.com:587
+RELAY_USERNAME=AKIAGHEVSQTOOSQBCSWQ
+RELAY_PASSWORD=BK+kjsdfliWELIhEFnlkjf/jwlfkEFN/kDj89Ufj/AAc
+ALLOWED_SENDER_DOMAINS=<your-domain>
+```
+
+You will need to configure DKIM and SPF for your domain.
+
 ### Sending messages directly
 
 If you're sending messages directly, you'll need to:

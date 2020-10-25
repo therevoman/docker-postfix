@@ -10,12 +10,14 @@ jobs:
     steps:
       - name: Checkout tag
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Checkout gh-pages
         uses: actions/checkout@v2
         with:
           ref: "gh-pages"
           path: "gh-pages"
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Get the build version number
         id: version_number
         shell: bash
@@ -39,15 +41,13 @@ jobs:
       - name: Create helm chart index
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: cd gh-pages && helm repo index . --url https://bokysan.github.io/docker-postfix
+          exec: cd gh-pages && rm -rf .git && helm repo index . --url https://bokysan.github.io/docker-postfix
       - name: Upload gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./gh-pages
           tag_name: gh-pages-${{ steps.version_number.outputs.RELEASE_VERSION }}
-          keep_files: true
-          exclude_assets: '.git'
       - name: Changelog
         uses: Bullrich/generate-release-changelog@master
         id: Changelog

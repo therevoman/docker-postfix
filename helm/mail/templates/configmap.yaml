@@ -1,4 +1,4 @@
-{{- $chart := "postfix" -}}
+{{- $chart := "mail" -}}
 {{- $fullName := include (print $chart ".fullname") . -}}
 {{- $labels := include (print $chart ".labels") . -}}
 {{- $files := .Files -}}

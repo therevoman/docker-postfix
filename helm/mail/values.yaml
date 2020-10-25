@@ -2,6 +2,7 @@ replicaCount: 1
 
 image:
   repository: boky/postfix
+  # tag: "" # If not specified uses chart's AppVersion as the tag
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

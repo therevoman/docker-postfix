@@ -1,4 +1,4 @@
-{{- $chart := "postfix" -}}
+{{- $chart := "mail" -}}
 {{- $fullName := include (print $chart ".fullname") . -}}
 {{- $labels := include (print $chart ".labels") . -}}
 {{- $reloaderAnnotations := include (print $chart ".reloader") . -}}
@@ -55,22 +55,21 @@ spec:
 
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext: {{- toYaml .Values.container.postfix.securityContext | indent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           ports:
             - name: smtp
               containerPort: 587
               protocol: TCP
           readinessProbe:
             initialDelaySeconds: 10
-            periodSeconds: 60
+            periodSeconds: 30
             tcpSocket:
               port: 587
           livenessProbe:
             initialDelaySeconds: 10
-            periodSeconds: 120
+            periodSeconds: 60
             tcpSocket:
               port: 587
           envFrom:
@@ -82,7 +81,14 @@ spec:
               name: {{ $fullName }}
             {{- with .Values.extraVolumeMounts }}{{- toYaml . | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
-
+      {{- if .Values.persistence.enabled }}
+      {{- with .Values.extraVolumes }}volumes: {{- toYaml . | nindent 8 }}{{ end }}
+      {{- else }}
+      volumes:
+        - name: {{ $fullName }}
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}{{- toYaml . | nindent 8 }}{{ end }}
+      {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
@@ -98,10 +104,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size | quote }}
-  {{ with .Values.extraVolumes }}volumes: {{- toYaml . | nindent 4 }}{{ end }}
-  {{- else }}
-  volumes:
-    - name: {{ $fullName }}
-      emptyDir: {}
-    {{- with .Values.extraVolumes }}{{- toYaml . | nindent 4 }}{{ end }}
   {{- end }}

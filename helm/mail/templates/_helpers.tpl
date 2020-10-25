@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "postfix.name" -}}
+{{- define "mail.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "postfix.fullname" -}}
+{{- define "mail.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "postfix.chart" -}}
+{{- define "mail.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "postfix.labels" -}}
-helm.sh/chart: {{ include "postfix.chart" . }}
-{{ include "postfix.selectorLabels" . }}
+{{- define "mail.labels" -}}
+helm.sh/chart: {{ include "mail.chart" . }}
+{{ include "mail.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,17 +46,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "postfix.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "postfix.name" . }}
+{{- define "mail.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "mail.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "postfix.serviceAccountName" -}}
+{{- define "mail.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "postfix.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "mail.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
@@ -65,13 +65,13 @@ Create the name of the service account to use
 {{/*
 Define checksum annotations
 */}}
-{{- define "postfix.checksums" -}}
+{{- define "mail.checksums" -}}
 # Reload for Statefulset when configmap changes on deployment
 checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- end -}}
 
-{{- define "postfix.reloader" -}}
+{{- define "mail.reloader" -}}
 # Auto-reload postfix if somebody changes config map directly in Kuberentes.
 # Uses: https://github.com/stakater/Reloader
-configmap.reloader.stakater.com/reload: "{{ include "postfix.fullname" . }}"
+configmap.reloader.stakater.com/reload: "{{ include "mail.fullname" . }}"
 {{- end -}}

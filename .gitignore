@@ -1,2 +1,4 @@
 .idea
 helm/fixtures
+public
+gh-pages

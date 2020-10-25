@@ -27,6 +27,7 @@ Simple postfix relay host ("postfix null client") for your Docker containers. Ba
     * [Changing the DKIM selector](#changing-the-dkim-selector)
     * [Overriding specific OpenDKIM settings](#overriding-specific-opendkim-settings)
     * [Verifying your DKIM setup](#verifying-your-dkim-setup)
+* [Helm chart](#helm-chart)
 * [Extending the image](#extending-the-image)
   * [Using custom init scripts](#using-custom-init-scripts)
 * [Security](#security)
@@ -57,6 +58,13 @@ To run the container, do the following:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com" -p 1587:587 boky/postfix
 ```
 
+or
+
+```shell script
+helm repo add bokysan https://bokysan.github.io/docker-postfix/
+helm upgrade --install --set persistence.enabled=false --set config.general.ALLOWED_SENDER_DOMAINS=example.com mail bokysan/mail
+```
+
 You can now send emails by using `localhost:1587` as your SMTP server address. Of course, if
 you haven't configured your `example.com` domain to allow sending from this IP (see
 [openspf](http://www.openspf.org/)), your emails will most likely be regarded as spam.
@@ -68,7 +76,7 @@ All standard caveats of configuring the SMTP server apply:
     [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/),
     [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer
     workarounds).
-  * Hosting centers also tend to block port 25, which can be unblocked per requirst (e.g. for AWS either
+  * Hosting centers also tend to block port 25, which can be unblocked per request (e.g. for AWS either
     [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to
     their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes).
 * You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or
@@ -325,6 +333,64 @@ variable from OpenDKIM config.
 I strongly suggest using a service such as [dkimvalidator](https://dkimvalidator.com/) to make sure your keys are set up
 properly and your DNS server is serving them with the correct records.
 
+## Helm chart
+
+This image comes with its own helm chart. The chart versions are aligned with the releases of the image. Charts are hosted
+through this repository.
+
+To install the image, simply do the following:
+
+```shell script
+helm repo add bokysan https://bokysan.github.io/docker-postfix/
+helm upgrade --install --set persistence.enabled=false --set config.general.ALLOWED_SENDER_DOMAINS=example.com mail bokysan/mail
+```
+
+Chart configuration is as follows:
+
+| Property | Default value | Description |
+|----------|---------------|-------------|
+| `replicaCount` | `1` | How many replicas to start |
+| `image.repository` | `boky/postfix` | This docker image repository |
+| `image.tag` | *empty* | Docker image tag, by default uses Chart's `AppVersion` |
+| `image.pullPolicy` | `IfNotPresent` | [Pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) for the image |
+| `imagePullSecrets` | `[]` | Pull secrets, if neccessary |
+| `nameOverride` | `""` | Override the helm chart name |
+| `fullnameOverride` | `""` | Override the helm full deployment name |
+| `serviceAccount.create` | `true` | Specifies whether a service account should be created |
+| `serviceAccount.annotations` | `{}` | Annotations to add to the service account |
+| `serviceAccount.name` | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `service.type` | `ClusterIP` | How is the server exposed |
+| `service.port` | `587` | SMTP submission port |
+| `service.labels` | `{}` | Additional service labels |
+| `service.annotations` | `{}` | Additional service annotations |
+| `resources` | `{}` | [Pod resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
+| `autoscaling.enabled` | `false` | Set to `true` to enable [Horisontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) |
+| `autoscaling.minReplicas` | `1` | Minimum number of replicas |
+| `autoscaling.maxReplicas` | `100` | Maximum number of replicas |
+| `autoscaling.targetCPUUtilizationPercentage` | `80` | When to scale up |
+| `autoscaling.targetMemoryUtilizationPercentage` | `` | When to scale up |
+| `autoscaling.labels` | `{}` | Additional HPA labels |
+| `autoscaling.annotations` | `{}` | Additional HPA annotations |
+| `nodeSelector` | `{}` | Standard Kubernetes stuff |
+| `tolerations` | `[]` | Standard Kubernetes stuff |
+| `affinity` | `{}` | Standard Kubernetes stuff |
+| `extraVolumes` | `[]` | Append any extra volumes to the pod |
+| `extraVolumeMounts` | `[]` | Append any extra volume mounts to the postfix container |
+| `extraInitContainers` | `[]` | Execute any extra init containers on startup |
+| `extraEnv` | `[]` | Add any extra environment variables to the container |
+| `deployment.labels` | `{}` | Additional labels for the statefulset |
+| `deployment.annotations` | `{}` | Additional annotations for the statefulset |
+| `pod.securityContext` | `{}` | Pods's [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) |
+| `pod.labels` | `{}` | Additional labels for the pod |
+| `pod.annotations` | `{}` | Additional annotations for the pod |
+| `container.postfixsecurityContext` | `{}` | Containers's [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) |
+| `config.general` | `{}` | Key-value list of general configuration options, e.g. `TZ: "Europe/London"` |
+| `config.postfix` | `{}` | Key-value list of general postfix options, e.g. `myhostname: "demo"` |
+| `config.opendkim` | `{}` | Key-value list of general OpenDKIM options, e.g. `RequireSafeKeys: "yes"` |
+| `persistence.enabled` | `true` | Persist Postfix's queu on disk |
+| `persistence.accessModes` | `[ 'ReadWriteOnce' ]` | Access mode |
+| `persistence.size` | `1Gi` | Storage size |
+| `persistence.storageClass` | `""` | Storage class |
+
 ## Extending the image
 
 ### Using custom init scripts
@@ -444,6 +510,22 @@ Your configuration would be as follows:
 ```shell script
 ALLOWED_SENDER_DOMAINS=<your-domain>
 ```
+
+#### Careful
+
+Getting all of this to work properly is not a small feat:
+
+* Hosting will regularly block outgoing connections to port 25.** On AWS, for example you can
+  [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) and request for
+  port 25 to be unblocked.
+* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or
+  [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
+* You'll need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your emails going
+  to spam.
+* Microsoft is especially notorious for sending emails from new IPs directly into spam. If you're having trouble
+  delivering email to `outlook.com` domains, you will need to enroll in their
+  [Smart Network Data Service](https://sendersupport.olc.protection.outlook.com/snds/) programme. And to do this you
+  will need to *be the owner of the netblock you're sending the emails from*.
 
 ## Similar projects
 

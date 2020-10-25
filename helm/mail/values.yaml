@@ -14,14 +14,6 @@ serviceAccount:
   annotations: {} # Annotations to add to the service account
   name: "" # The name of the service account to use. If not set and create is true, a name is generated using the fullname template
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
 service:
   type: ClusterIP
   port: 587
@@ -49,7 +41,6 @@ autoscaling:
   labels: {}
   annotations: {}
 
-resources: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
@@ -64,6 +55,12 @@ deployment:
 
 pod:
   securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
   labels: {}
   annotations: {}
 

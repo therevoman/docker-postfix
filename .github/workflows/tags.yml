@@ -10,14 +10,14 @@ jobs:
     steps:
       - name: Checkout tag
         uses: actions/checkout@v2
-
       - name: Checkout gh-pages
         uses: actions/checkout@v2
         with:
           ref: "gh-pages"
-
-
+          path: "gh-pages"
+          fetch-depth: 0
       - name: Get the build version number
+        id: version_number
         shell: bash
         run: |
           echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
@@ -35,10 +35,16 @@ jobs:
       - name: Package helm chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          # Successfully packaged chart and saved it to: /Users/boky/development/projects/docker-postfix/mail-2.1.0.tgz
-          exec: helm package --app-version $RELEASE_VERSION --version $RELEASE_VERSION --destination ./public helm/mail
-      - name: Chart to gh-pages
+          exec: helm package --app-version $RELEASE_VERSION --version $RELEASE_VERSION --destination ./gh-pages helm/mail
+      - name: Create helm chart index
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: cd gh-pages && helm repo index . --url https://bokysan.github.io/docker-postfix
+      - name: Upload gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./gh-pages
+          tag_name: gh-pages-${{ steps.version_number.outputs.RELEASE_VERSION }}
+          keep_files: true
+          exclude_assets: '.git'

@@ -11,14 +11,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Get release version
-        run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+        run: echo "${GITHUB_REF:10}" >> $RELEASE_VERSION
       - name: Run unit tests
         run: ./unit-tests.sh
       - name: Set up Docker Buildx
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
-          version: latest
+          buildx-version: latest
       - name: Run integration tests
         run: ./integration-tests.sh
       - name: Run HELM chart tests

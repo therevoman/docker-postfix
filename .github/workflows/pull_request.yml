@@ -16,7 +16,7 @@ jobs:
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
-          version: latest
+          buildx-version: latest
       - name: Run integration tests
         run: ./integration-tests.sh
       - name: Run HELM chart tests

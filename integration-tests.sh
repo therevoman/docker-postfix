@@ -3,14 +3,21 @@ set -e
 cd integration-tests
 
 run_test() {
+    local exit_code
     echo
     echo
     echo "☆☆☆☆☆☆☆☆☆☆ $1 ☆☆☆☆☆☆☆☆☆☆"
     echo
     (
         cd "$1"
+        set +e
         docker-compose up --build --abort-on-container-exit --exit-code-from tests
+        exit_code="$?"
         docker-compose down
+        if [[ "$exit_code" != 0 ]]; then
+            exit "$exit_code"
+        fi
+        set -e
     )
 }
 

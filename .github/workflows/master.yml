@@ -21,6 +21,8 @@ jobs:
           version: latest
       - name: Run integration tests
         run: ./integration-tests.sh
+      - name: Run HELM chart tests
+        run: ./helm/tests.sh
       - name: Build master
         env:
           DOCKER_USERNAME: 'boky'

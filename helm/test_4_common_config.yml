@@ -19,6 +19,10 @@ config:
   opendkim:
     RequireSafeKeys: yes
 
+extraEnv:
+  - name: HELLO
+    value: WORLD
+
 extraVolumeMounts:
   - mountPath: /etc/opendkim/keys
     name: opendkim-keys

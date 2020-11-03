@@ -63,15 +63,22 @@ spec:
               containerPort: 587
               protocol: TCP
           readinessProbe:
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            tcpSocket:
-              port: 587
-          livenessProbe:
-            initialDelaySeconds: 10
+            initialDelaySeconds: 5
             periodSeconds: 60
-            tcpSocket:
-              port: 587
+            command: >
+              sh -c 'printf "EHLO healthcheck\n" | nc localhost 587 | grep -qE "^220.*ESMTP Postfix"'
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 1
+            command: >
+              sh -c 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "/usr/libexec/postfix/master"'
+          startupProbe:
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 12
+            command: >
+              sh -c 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "{postfix-script}" && ps axf | fgrep -v grep | fgrep -q "{opendkim.sh}"'
           envFrom:
             - configMapRef:
                 name: {{ $fullName | quote }}
@@ -79,15 +86,15 @@ spec:
           volumeMounts:
             - mountPath: /var/spool/postfix
               name: {{ $fullName }}
-            {{- with .Values.extraVolumeMounts }}{{- toYaml . | nindent 12 }}{{ end }}
+            {{- if .Values.extraVolumeMounts }}{{- toYaml .Values.extraVolumeMounts | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
       {{- if .Values.persistence.enabled }}
-      {{- with .Values.extraVolumes }}volumes: {{- toYaml . | nindent 8 }}{{ end }}
+      {{ if .Values.extraVolumes }}volumes: {{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
       {{- else }}
       volumes:
         - name: {{ $fullName }}
           emptyDir: {}
-        {{- with .Values.extraVolumes }}{{- toYaml . | nindent 8 }}{{ end }}
+        {{- if .Values.extraVolumes }}{{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
       {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:

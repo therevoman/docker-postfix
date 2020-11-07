@@ -192,11 +192,14 @@ This level defines how the postfix will connect to your upstream server.
 > Note: These parameters are used when `RELAYHOST` and `RELAYHOST_USERNAME` are provided.
 
 These parameters allow you to configure a relayhost that requires (or recommends) the [XOAuth2 authentication method](https://github.com/tarickb/sasl-xoauth2) (e.g. GMail).
-- `XOAUTH2_CLIENT_ID` and  `XOAUTH2_SECRET` are the [OAuth2 client credentials](#oauth2-client-credentials-gmail).
-- `XOAUTH2_INITIAL_ACCESS_TOKEN` and `XOAUTH2_INITIAL_REFRESH_TOKEN` are the [initial access token and refresh tokens](#obtain-initial-access-token-gmail). These values are only required to initialize the token file `/var/spool/postfix/xoauth2-tokens/$RELAYHOST_USERNAME`.
+
+* `XOAUTH2_CLIENT_ID` and  `XOAUTH2_SECRET` are the [OAuth2 client credentials](#oauth2-client-credentials-gmail).
+* `XOAUTH2_INITIAL_ACCESS_TOKEN` and `XOAUTH2_INITIAL_REFRESH_TOKEN` are the [initial access token and refresh tokens](#obtain-initial-access-token-gmail).
+   These values are only  required to initialize the token file `/var/spool/postfix/xoauth2-tokens/$RELAYHOST_USERNAME`.
 
 Example:
-```
+
+```shell script
 docker run --rm --name pruebas-postfix \
     -e RELAYHOST="[smtp.gmail.com]:587" \
     -e RELAYHOST_USERNAME="<put.your.account>@gmail.com" \
@@ -208,6 +211,7 @@ docker run --rm --name pruebas-postfix \
     -e XOAUTH2_INITIAL_REFRESH_TOKEN="<put_your_refresh_token>" \
     boky/postfix
 ```
+
 Next sections describe how to obtain these values.
 
 ##### OAuth2 Client Credentials (GMail)
@@ -226,8 +230,8 @@ Save the resulting tokens and use them to initialize `XOAUTH2_INITIAL_ACCESS_TOK
 
 ##### Debug XOAuth2 issues
 
-If you have XOAuth2 authentication issues you can enable XOAuth2 debug message setting `XOAUTH2_SYSLOG_ON_FAILURE` to `"yes"` (default: `"no"`). If you need a more detailed log trace about XOAuth2 you can set `XOAUTH2_FULL_TRACE` to `"yes"` (default: `"no"`).
-
+If you have XOAuth2 authentication issues you can enable XOAuth2 debug message setting `XOAUTH2_SYSLOG_ON_FAILURE` to `"yes"` (default: `"no"`). If you need a more detailed
+log trace about XOAuth2 you can set `XOAUTH2_FULL_TRACE` to `"yes"` (default: `"no"`).
 
 #### `MASQUERADED_DOMAINS`
 
@@ -496,7 +500,7 @@ account which will use `UID:GID` of `100:101`. `opendkim` will run under account
 
 ### Relaying messages through your Gmail account
 
-Please note that Gmail does not support using your password with non-OAuth2 clients. You will need to either enable 
+Please note that Gmail does not support using your password with non-OAuth2 clients. You will need to either enable
 [Less secure apps](https://support.google.com/accounts/answer/6010255?hl=en) in your account and assign an "app password"
 or [configure postfix support for XOAuth2 authentication](#xoauth2_client_id-xoauth2_secret-xoauth2_initial_access_token-and-xoauth2_initial_refresh_token).
 You'll also need to use (only) your email as the sender address.

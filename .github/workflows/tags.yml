@@ -35,6 +35,10 @@ jobs:
           DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
           PLATFORMS: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le"
         run: ./build.sh -t boky/postfix:$RELEASE_VERSION --push
+      - name: Copy `README.md` and `LICENCE` into the helm chart
+        id: readme_and_licence
+        shell: bash
+        run: cp README.md LICENSE helm/mail/
       - name: Package helm chart
         uses: WyriHaximus/github-action-helm3@v2
         with:

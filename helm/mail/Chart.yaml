@@ -1,6 +1,13 @@
 apiVersion: v2
 name: mail
-description: Helm chart for Postfix mail server
+description: An outgoing SMTP mail relay for your applications in Kubernetes cluster
+icon: https://bokysan.github.io/docker-postfix/postfix.png
+home: https://github.com/bokysan/docker-postfix
+sources:
+  - https://github.com/bokysan/docker-postfix
+maintainers:
+  - name: Bokysan
+    url: https://github.com/bokysan
 
 # A chart can be either an 'application' or a 'library' chart.
 #

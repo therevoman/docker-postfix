@@ -24,9 +24,9 @@ jobs:
         shell: bash
         env: # Or as an environment variable
           XOAUTH2_RELAYHOST_USERNAME: ${{ secrets.XOAUTH2_RELAYHOST_USERNAME }}
-          XOAUTH2_CLIENT_ID: ${{ XOAUTH2_CLIENT_ID }}
-          XOAUTH2_SECRET: ${{ XOAUTH2_SECRET }}
-          XOAUTH2_INITIAL_REFRESH_TOKEN: ${{ XOAUTH2_INITIAL_REFRESH_TOKEN }}
+          XOAUTH2_CLIENT_ID: ${{ secrets.XOAUTH2_CLIENT_ID }}
+          XOAUTH2_SECRET: ${{ secrets.XOAUTH2_SECRET }}
+          XOAUTH2_INITIAL_REFRESH_TOKEN: ${{ secrets.XOAUTH2_INITIAL_REFRESH_TOKEN }}
         run:
           echo "RELAYHOST_USERNAME=${XOAUTH2_RELAYHOST_USERNAME}" > integration-tests/xoauth2/.env
           echo "FROM=${XOAUTH2_RELAYHOST_USERNAME}" >> integration-tests/xoauth2/.env

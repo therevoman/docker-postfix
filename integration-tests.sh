@@ -28,9 +28,7 @@ if [[ $# -gt 0 ]]; then
         shift
     done
 else
-    # Disable xoauth2 integration tests as they an access and refresh token. And these expire
-    # after a certain time, so we cannot rely on tests working all the time.
-    for i in `find -maxdepth 1 -type d | grep -Ev "^./(xoauth2|tester)" | sort`; do
+    for i in `find -maxdepth 1 -type d | grep -Ev "^./(tester)" | sort`; do
         i="$(basename "$i")"
         if [ "$i" == "." ] || [ "$i" == ".." ]; then
             continue

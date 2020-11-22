@@ -20,14 +20,14 @@ jobs:
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           buildx-version: latest
-      - name: Prepare .env for xoatuh2 integration tests
+      - name: Run integration tests
         shell: bash
         env: # Or as an environment variable
           XOAUTH2_RELAYHOST_USERNAME: ${{ secrets.XOAUTH2_RELAYHOST_USERNAME }}
           XOAUTH2_CLIENT_ID: ${{ secrets.XOAUTH2_CLIENT_ID }}
           XOAUTH2_SECRET: ${{ secrets.XOAUTH2_SECRET }}
           XOAUTH2_INITIAL_REFRESH_TOKEN: ${{ secrets.XOAUTH2_INITIAL_REFRESH_TOKEN }}
-        run:
+        run: |
           echo "RELAYHOST_USERNAME=${XOAUTH2_RELAYHOST_USERNAME}" > integration-tests/xoauth2/.env
           echo "FROM=${XOAUTH2_RELAYHOST_USERNAME}" >> integration-tests/xoauth2/.env
           echo "TO=${XOAUTH2_RELAYHOST_USERNAME}" >> integration-tests/xoauth2/.env
@@ -35,8 +35,7 @@ jobs:
           echo "XOAUTH2_SECRET=${XOAUTH2_SECRET}" >> integration-tests/xoauth2/.env
           echo "XOAUTH2_INITIAL_REFRESH_TOKEN=${XOAUTH2_INITIAL_REFRESH_TOKEN}" >> integration-tests/xoauth2/.env
           cp integration-tests/xoauth2/.env integration-tests/xoauth2-error/.env
-      - name: Run integration tests
-        run: ./integration-tests.sh
+          ./integration-tests.sh
       - name: Run HELM chart tests
         run: ./helm/tests.sh
       - name: Build master

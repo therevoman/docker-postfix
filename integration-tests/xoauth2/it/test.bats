@@ -37,6 +37,7 @@ load /common/common-xoauth2.sh
 	smtp_result=$(get_smtp_result '/logs/postfix.log' "${postfix_message_id}")
 	status=$(get_param_value "${smtp_result}" 'status')
 
+	output="$(cat /logs/postfix.log)"
 	[ -n "$status" ]
 	echo "$status" | grep -q -E "^sent"
 }

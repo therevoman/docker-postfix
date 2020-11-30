@@ -28,7 +28,7 @@ if [[ $# -gt 0 ]]; then
         shift
     done
 else
-    for i in `find -maxdepth 1 -type d | grep -Ev "^./(tester)" | sort`; do
+    for i in `find -maxdepth 1 -type d | grep -Ev "^./(tester|xoauth2)" | sort`; do
         i="$(basename "$i")"
         if [ "$i" == "." ] || [ "$i" == ".." ]; then
             continue

@@ -2,7 +2,7 @@ ARG ALPINE_VERSION=latest
 FROM alpine:${ALPINE_VERSION} as build
 
 ARG SASL_XOAUTH2_REPO_URL=https://github.com/tarickb/sasl-xoauth2.git
-ARG SASL_XOAUTH2_GIT_REF=release-0.9
+ARG SASL_XOAUTH2_GIT_REF=release-0.10
 
 RUN        true && \
            apk add --no-cache --upgrade git && \

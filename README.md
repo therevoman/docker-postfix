@@ -616,6 +616,8 @@ The other projects are, in completely random order:
 * [catatnight/postfix](https://github.com/catatnight/docker-postfix)
 * [juanluisbaptiste/docker-postfix](https://github.com/juanluisbaptiste/docker-postfix)
 * [docker-mail-relay](https://github.com/alterrebe/docker-mail-relay)
+* [applariat/kubernetes-postfix-relay-host](https://github.com/applariat/kubernetes-postfix-relay-host)
+* [eldada/postfix-relay-kubernetes](https://github.com/eldada/postfix-relay-kubernetes)
 
 ## License check
 

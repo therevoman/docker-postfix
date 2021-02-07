@@ -51,7 +51,7 @@ fi
 }
 
 @test "spaces in parameters" {
-	do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:example.org, reject"
+	do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access lmdb:example.org, reject"
 	postfix check
 }
 

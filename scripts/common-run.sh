@@ -116,9 +116,9 @@ postfix_setup_relayhost() {
 			else
 				echo "$RELAYHOST $RELAYHOST_USERNAME:$RELAYHOST_PASSWORD" >> /etc/postfix/sasl_passwd
 			fi
-			postmap hash:/etc/postfix/sasl_passwd
+			postmap lmdb:/etc/postfix/sasl_passwd
 			do_postconf -e "smtp_sasl_auth_enable=yes"
-			do_postconf -e "smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd"
+			do_postconf -e "smtp_sasl_password_maps=lmdb:/etc/postfix/sasl_passwd"
 			do_postconf -e "smtp_sasl_security_options=noanonymous"
 			do_postconf -e "smtp_sasl_tls_security_options=noanonymous"
 		else
@@ -222,9 +222,9 @@ postfix_setup_sender_domains() {
 			echo -e "$i\tOK" >> $allowed_senders
 		done
 		echo
-		postmap $allowed_senders
+		postmap lmdb:$allowed_senders
 
-		do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:$allowed_senders, reject"
+		do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access lmdb:$allowed_senders, reject"
 
 		# Since we are behind closed doors, let's just permit all relays.
 		do_postconf -e "smtpd_relay_restrictions=permit"

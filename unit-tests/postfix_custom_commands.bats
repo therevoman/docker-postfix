@@ -5,9 +5,9 @@ load /code/scripts/common-run.sh
 
 
 @test "Make sure that postfix_custom_commands adds lines" {
-    local POSTFIX_alias_database=hash:/etc/mail/aliases
+    local POSTFIX_alias_database=lmdb:/etc/mail/aliases
     postfix_custom_commands
-    cat /etc/postfix/main.cf | fgrep -qx "alias_database = hash:/etc/mail/aliases"
+    cat /etc/postfix/main.cf | fgrep -qx "alias_database = lmdb:/etc/mail/aliases"
     postfix check
 }
 

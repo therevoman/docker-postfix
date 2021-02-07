@@ -18,7 +18,7 @@ FROM alpine:${ALPINE_VERSION}
 LABEL maintaner="Bojan Cekrlic - https://github.com/bokysan/docker-postfix/"
 
 RUN        true && \
-           apk add --no-cache --upgrade cyrus-sasl cyrus-sasl-plain cyrus-sasl-login && \
+           apk add --no-cache --upgrade cyrus-sasl cyrus-sasl-static cyrus-sasl-digestmd5 cyrus-sasl-crammd5 cyrus-sasl-login cyrus-sasl-ntlm && \
            apk add --no-cache postfix && \
            apk add --no-cache opendkim && \
            apk add --no-cache --upgrade ca-certificates tzdata supervisor rsyslog musl musl-utils bash opendkim-utils && \

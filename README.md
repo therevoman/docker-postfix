@@ -1,4 +1,4 @@
-# docker-postfix 
+# docker-postfix
 
 ![Build status](https://github.com/bokysan/docker-postfix/workflows/Docker%20image/badge.svg) [![Latest commit](https://img.shields.io/github/last-commit/bokysan/docker-postfix)](https://github.com/bokysan/docker-postfix/commits/master) [![Latest release](https://img.shields.io/github/v/release/bokysan/docker-postfix?sort=semver&Label=Latest%20release)](https://github.com/bokysan/docker-postfix/releases) [![Docker image size](https://img.shields.io/docker/image-size/boky/postfix?sort=semver)](https://hub.docker.com/r/boky/postfix/) [![Docker Stars](https://img.shields.io/docker/stars/boky/postfix.svg)](https://hub.docker.com/r/boky/postfix/) [![Docker Pulls](https://img.shields.io/docker/pulls/boky/postfix.svg)](https://hub.docker.com/r/boky/postfix/) ![License](https://img.shields.io/github/license/bokysan/docker-postfix) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbokysan%2Fdocker-postfix.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbokysan%2Fdocker-postfix?ref=badge_shield)
 
@@ -69,39 +69,34 @@ helm repo add bokysan https://bokysan.github.io/docker-postfix/
 helm upgrade --install --set persistence.enabled=false --set config.general.ALLOWED_SENDER_DOMAINS=example.com mail bokysan/mail
 ```
 
-You can now send emails by using `localhost:1587` as your SMTP server address. Of course, if
-you haven't configured your `example.com` domain to allow sending from this IP (see
-[openspf](http://www.openspf.org/)), your emails will most likely be regarded as spam.
+You can now send emails by using `localhost:1587` as your SMTP server address. If you haven't configured your `example.com` domain
+to allow sending from this IP (see [openspf](http://www.open-spf.org/)), your emails will most likely be regarded as spam.
 
 All standard caveats of configuring the SMTP server apply:
 
 * **MAKE SURE YOUR OUTGOING PORT 25 IS NOT BLOCKED.**
   * Most ISPs block outgoing connections to port 25 and several companies (e.g.
     [NoIP](https://www.noip.com/blog/2013/03/26/my-isp-blocks-smtp-port-25-can-i-still-host-a-mail-server/),
-    [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25) offer
-    workarounds).
-  * Hosting centers also tend to block port 25, which can be unblocked per request (e.g. for AWS either
-    [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) or forward mail to
-    their [SES](https://aws.amazon.com/ses/) service, which is free for low volumes).
-* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or
+    [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25)) offer
+    workarounds.
+  * Hosting centers also tend to block port 25, which can be unblocked per request, see below for AWS hosting.
+* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) and/or
   [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
 * If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries.
 * You'll most likely need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your
   mails going to spam.
 
-If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that as a
-consequence it's pretty difficult to host a SMTP server on a dynamic IP address.
+If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that it's pretty difficult
+to host a SMTP server on a dynamic IP address.
 
-**Please note that the image uses the submission (587) port by default**. Port 25 is not exposed on purpose, as it's
-regularly blocked by ISP or already occupied by other services.
+**Please note that the image uses the submission (587) port by default**. Port 25 is not exposed on purpose, as it's regularly blocked
+by ISPs, already occupied by other services, and in general should only be used for server-to-server communication.
 
 ## Configuration options
 
-The following configuration options are available
-
 ### General options
 
-* `TZ` = The timezone for the image
+* `TZ` = The timezone for the image, e.g. `Europe/Amsterdam`
 * `FORCE_COLOR` = Set to `1` to force color output (otherwise auto-detected)
 * `INBOUND_DEBUGGING` = Set to `1` to enable detailed debugging in the logs
 * `ALLOWED_SENDER_DOMAINS` = domains which are allowed to send email via this server
@@ -125,14 +120,14 @@ Example:
 docker run --rm --name postfix -e "ALLOWED_SENDER_DOMAINS=example.com example.org" -p 1587:587 boky/postfix
 ```
 
-If you want to set the restrictions on the recipient and not on the sender (anyone can send mails but just to a single domain for instance),
-set `ALLOW_EMPTY_SENDER_DOMAINS` to a non-empty value (e.g. `true`) and `ALLOWED_SENDER_DOMAINS` to an empty string. Then extend this image through custom scripts to configure Postfix further.
+If you want to set the restrictions on the recipient and not on the sender (anyone can send mails but just to a single domain
+for instance), set `ALLOW_EMPTY_SENDER_DOMAINS` to a non-empty value (e.g. `true`) and `ALLOWED_SENDER_DOMAINS` to an empty
+string. Then extend this image through custom scripts to configure Postfix further.
 
 #### Log format
 
-The image will by default output logs in human-readable (`plain`) format. If you are deploying the image to Kubernetes,
-it might be worth chaging the output format to `json` as it's more easily parsable by tools such as
-[Prometheus](https://prometheus.io/).
+The image will by default output logs in human-readable (`plain`) format. If you are deploying the image to Kubernetes, it might
+be worth chaging the output format to `json` as it's more easily parsable by tools such as [Prometheus](https://prometheus.io/).
 
 To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=json`.
 
@@ -148,7 +143,7 @@ To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=js
 * `XOAUTH2_INITIAL_REFRESH_TOKEN` = Initial OAuth2 refresh token.
 * `MASQUERADED_DOMAINS` = domains where you want to masquerade internal hosts
 * `SMTP_HEADER_CHECKS`= Set to `1` to enable header checks of to a location of the file for header checks
-* `POSTFIX_hostname` = Set tha name of this postfix server
+* `POSTFIX_hostname` = Set the name of this postfix server
 * `POSTFIX_mynetworks` = Allow sending mails only from specific networks ( default `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` )
 * `POSTFIX_message_size_limit` = The maximum size of the messsage, in bytes, by default it's unlimited
 * `POSTFIX_<any_postfix_setting>` = provide any additional postfix setting
@@ -503,7 +498,7 @@ account which will use `UID:GID` of `100:101`. `opendkim` will run under account
 ### Relaying messages through your Gmail account
 
 Please note that Gmail does not support using your password with non-OAuth2 clients. You will need to either enable
-[Less secure apps](https://support.google.com/accounts/answer/6010255?hl=en) in your account and assign an "app password"
+[Less secure apps](https://support.google.com/accounts/answer/6010255?hl=en) in your account and assign an "app password",
 or [configure postfix support for XOAuth2 authentication](#xoauth2_client_id-xoauth2_secret-xoauth2_initial_access_token-and-xoauth2_initial_refresh_token).
 You'll also need to use (only) your email as the sender address.
 
@@ -548,15 +543,16 @@ There's no need to configure DKIM or SPF, as Gmail will add these headers automa
 
 ### Relaying messages through Amazon's SES
 
-If your application runs in Amazon Elastic Compute Cloud (Amazon EC2), you can use Amazon SES to send 62,000 emails
+If your application runs in Amazon Elastic Compute Cloud (Amazon EC2), you can use Amazon SES to send up to 62,000 emails
 every month at no additional charge. You'll need an AWS account and SMTP credentials. The SMTP settings are available
 on the SES page. For example, for `eu-central-1`:
 
-* the SES page [is available here](https://eu-central-1.console.aws.amazon.com/ses/home?region=eu-central-1#smtp-settings)
-* [create the user/credentials](https://console.aws.amazon.com/iam/home?#s=SESHomeV4/eu-central-1). **Make sure
-  you write them down, as you will only see them once.**
+* see the [SES page for details](https://eu-central-1.console.aws.amazon.com/ses/home?region=eu-central-1#smtp-settings),
+* [create the user credentials](https://console.aws.amazon.com/iam/home?#s=SESHomeV4/eu-central-1)
 
-By default, messages that you send through Amazon SES use a subdomain of amazonses.com as the MAIL FROM domain. See
+**Make sure you write the user credentials down, as you will only see them once.**
+
+By default, messages that you send through Amazon SES use a subdomain of `amazonses.com` as the `MAIL FROM` domain. See
 [Amazon's documentation](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/mail-from.html) on how the domain can
 be configured.
 
@@ -569,13 +565,13 @@ RELAY_PASSWORD=BK+kjsdfliWELIhEFnlkjf/jwlfkEFN/kDj89Ufj/AAc
 ALLOWED_SENDER_DOMAINS=<your-domain>
 ```
 
-You will need to configure DKIM and SPF for your domain.
+You will need to configure DKIM and SPF for your domain as well.
 
 ### Sending messages directly
 
 If you're sending messages directly, you'll need to:
 
-* need to have a fixed IP address;
+* have a fixed IP address;
 * configure a reverse PTR record;
 * configure SPF and/or DKIM as explained in this document;
 * it's also highly advisable to have your own IP block.
@@ -590,15 +586,15 @@ ALLOWED_SENDER_DOMAINS=<your-domain>
 
 Getting all of this to work properly is not a small feat:
 
-* Hosting will regularly block outgoing connections to port 25.** On AWS, for example you can
+* Hosting providers will regularly block outgoing connections to port 25. On AWS, for example you can
   [fill out a form](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-port-25-throttle/) and request for
   port 25 to be unblocked.
 * You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) or
   [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
 * You'll need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your emails going
   to spam.
-* Microsoft is especially notorious for sending emails from new IPs directly into spam. If you're having trouble
-  delivering email to `outlook.com` domains, you will need to enroll in their
+* Microsoft is especially notorious for trashing emails from new IPs directly into spam. If you're having trouble
+  delivering emails to `outlook.com` domains, you will need to enroll in their
   [Smart Network Data Service](https://sendersupport.olc.protection.outlook.com/snds/) programme. And to do this you
   will need to *be the owner of the netblock you're sending the emails from*.
 

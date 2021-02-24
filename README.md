@@ -384,9 +384,9 @@ I strongly suggest using a service such as [dkimvalidator](https://dkimvalidator
 properly and your DNS server is serving them with the correct records.
 
 
-### Docker Secrets
+### Docker Secrets / Kubernetes secrets
 
-As an alternative to passing sensitive information via environment variables, _FILE may be appended to some environment variables (see below), causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in /run/secrets/<secret_name> files. For example:
+As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to some environment variables (see below), causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in `/run/secrets/<secret_name>` files. For example:
 
 ```
 docker run --rm --name pruebas-postfix \
@@ -401,7 +401,8 @@ docker run --rm --name pruebas-postfix \
     boky/postfix
 ```
 
-Currently, this is only supported for `XOAUTH2_CLIENT_ID`, `XOAUTH2_SECRET`, `XOAUTH2_INITIAL_ACCESS_TOKEN` and `XOAUTH2_INITIAL_REFRESH_TOKEN`.
+Currently, this is only supported for `RELAYHOST_PASSWORD`, `XOAUTH2_CLIENT_ID`, `XOAUTH2_SECRET`, `XOAUTH2_INITIAL_ACCESS_TOKEN`
+and `XOAUTH2_INITIAL_REFRESH_TOKEN`.
 
 ## Helm chart
 

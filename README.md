@@ -136,6 +136,7 @@ To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=js
 * `RELAYHOST` = Host that relays your messages
 * `RELAYHOST_USERNAME` = An (optional) username for the relay server
 * `RELAYHOST_PASSWORD` = An (optional) login password for the relay server
+* `RELAYHOST_PASSWORD_FILE` = An (optional) file containing the login password for the relay server. Mutually exclusive with the previous option.
 * `RELAYHOST_TLS_LEVEL` = Relay host TLS connection level
 * `XOAUTH2_CLIENT_ID` = OAuth2 client id used when configured as a relayhost.
 * `XOAUTH2_SECRET` = OAuth2 secret used when configured as a relayhost.
@@ -561,8 +562,8 @@ Your configuration would be as follows (example data):
 
 ```shell script
 RELAYHOST=email-smtp.eu-central-1.amazonaws.com:587
-RELAY_USERNAME=AKIAGHEVSQTOOSQBCSWQ
-RELAY_PASSWORD=BK+kjsdfliWELIhEFnlkjf/jwlfkEFN/kDj89Ufj/AAc
+RELAYHOST_USERNAME=AKIAGHEVSQTOOSQBCSWQ
+RELAYHOST_PASSWORD=BK+kjsdfliWELIhEFnlkjf/jwlfkEFN/kDj89Ufj/AAc
 ALLOWED_SENDER_DOMAINS=<your-domain>
 ```
 

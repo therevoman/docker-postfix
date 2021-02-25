@@ -9,6 +9,7 @@ Simple postfix relay host ("postfix null client") for your Docker containers. Ba
 * [Table of contents](#table-of-contents)
 * [Description](#description)
 * [TL;DR](#tldr)
+* [Updates](#updates)
 * [Configuration options](#configuration-options)
   * [General options](#general-options)
     * [Inbound debugging](#inbound-debugging)
@@ -66,11 +67,11 @@ or
 
 ```shell script
 helm repo add bokysan https://bokysan.github.io/docker-postfix/
-helm upgrade --install --set persistence.enabled=false --set config.general.ALLOWED_SENDER_DOMAINS=example.com mail bokysan/mail
+helm upgrade --install --set persistence.enabled=false --set config.general.ALLOW_EMPTY_SENDER_DOMAINS=1 mail bokysan/mail
 ```
 
-You can now send emails by using `localhost:1587` as your SMTP server address. If you haven't configured your `example.com` domain
-to allow sending from this IP (see [openspf](http://www.open-spf.org/)), your emails will most likely be regarded as spam.
+You can now send emails by using `localhost:1587` (on Docker) as your SMTP server address. Note that if you haven't configured your domain
+to allow sending from this IP/server/nameblock, **your emails will most likely be regarded as spam.**
 
 All standard caveats of configuring the SMTP server apply:
 
@@ -80,10 +81,10 @@ All standard caveats of configuring the SMTP server apply:
     [Dynu](https://www.dynu.com/en-US/Blog/Article?Article=How-to-host-email-server-if-ISP-blocks-port-25)) offer
     workarounds.
   * Hosting centers also tend to block port 25, which can be unblocked per request, see below for AWS hosting.
-* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) and/or
+* You'll most likely need to at least [set up SPF records](https://en.wikipedia.org/wiki/Sender_Policy_Framework) (see also [openspf](http://www.open-spf.org/)) and/or
   [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
-* If using DKIM (below), make sure to add DKIM keys to your domain's DNS entries.
-* You'll most likely need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records to prevent your
+* If using DKIM ([below](#dkim--domainkeys)), make sure to add DKIM keys to your domain's DNS entries.
+* You'll most likely need to set up [PTR](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) records as well to prevent your
   mails going to spam.
 
 If you don't know what any of the above means, get some help. Google is your friend. It's also worth noting that it's pretty difficult
@@ -91,6 +92,22 @@ to host a SMTP server on a dynamic IP address.
 
 **Please note that the image uses the submission (587) port by default**. Port 25 is not exposed on purpose, as it's regularly blocked
 by ISPs, already occupied by other services, and in general should only be used for server-to-server communication.
+
+## Updates
+
+### v3.0.0
+
+There's a potentially breaking change introduced now in `v3.0.0`: Oracle has changed the license of BerkleyDB to AGPL-3.0, making it
+unsuitable to link to packages with GPL-incompatible licenses. As a result Alpine (on which this image is based)
+[has deprecated BerkleyDB throughout the image](https://wiki.alpinelinux.org/wiki/Release_Notes_for_Alpine_3.13.0#Deprecation_of_Berkeley_DB_.28BDB.29):
+
+> Support for Postfix `hash` and `btree` databases has been removed. `lmdb` is the recommended replacement. Before upgrading, all tables in
+> `/etc/postfix/main.cf` using `hash` and `btree` must be changed to a supported alternative. See the
+> [Postfix lookup table documentation](http://www.postfix.org/DATABASE_README.html) for more information.
+
+While this should affect most of the users (`/etc/postfix/main.cf` is managed by this image), there might be use cases where
+people have their own configuration which relies on `hash` and `btree` databases. To avoid braking live systems, the version of this
+image has been updated to `v3.0.0.`.
 
 ## Configuration options
 

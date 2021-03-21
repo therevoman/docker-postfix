@@ -39,6 +39,13 @@ jobs:
         id: readme_and_licence
         shell: bash
         run: cp README.md LICENSE helm/mail/
+      - name: Changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+      # TODO: Include the changelog in Chart.yml as annotations.artifacthub.io/changes
+      # See more here: https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
       - name: Package helm chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
@@ -53,11 +60,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./gh-pages
           tag_name: gh-pages-${{ steps.version_number.outputs.RELEASE_VERSION }}
-      - name: Changelog
-        uses: Bullrich/generate-release-changelog@master
-        id: Changelog
-        env:
-          REPO: ${{ github.repository }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

@@ -28,10 +28,53 @@ rsyslog_log_format() {
 	sed -i -E "s/<log-format>/${log_format}/" /etc/rsyslog.conf
 }
 
+setup_conf() {
+	local srcfile
+	local dstfile
+	local base
+
+	# Make sure the /etc/postfix directory exists
+	mkdir -p /etc/postfix
+	# Make sure all the neccesary files (and directories) exist
+	if [[ -d "/etc/postfix.template/" ]]; then
+		for srcfile in /etc/postfix.template/*; do
+			base="$(basename $srcfile)"
+			dstfile="/etc/postfix/$base"
+
+			if [[ ! -e "$dstfile" ]]; then
+				debug "Creating ${emphasis}$dstfile${reset}."
+				cp -r "$srcfile" "$dstfile"
+			fi
+		done
+	fi
+}
+
 reown_folders() {
 	mkdir -p /var/spool/postfix/ && mkdir -p /var/spool/postfix/pid
 	chown root: /var/spool/postfix/
 	chown root: /var/spool/postfix/pid
+}
+
+postfix_upgrade_conf() {
+	local maincf=/etc/postfix/main.cf
+	local entry
+	local filename
+
+	# Check for any references to the old "hash:" and "btree:" databases and replae them with "lmdb:"
+	if cat "$maincf" | egrep -v "^#" | egrep -q "(hash|btree):"; then
+		info "Detected old hash: and btree: references in the config file, which are not supported anymore. Upgrading to lmdb:"
+		sed -i -E 's/(hash|btree):/lmdb:/g' "$maincf"
+		# Recreate aliases
+		for entry in $(cat "$maincf" | egrep -o "lmdb:[^,]+" | sort | uniq); do
+			filename="$(echo $entry | cut -d: -f2)"
+			if [[ -f "$filename" ]]; then
+				debug "Creating new postmap for ${emphasis}$entry${reset}."
+				postmap $entry
+			fi
+		done
+	else
+		debug "No upgrade needed."
+	fi
 }
 
 postfix_disable_utf8() {
@@ -174,7 +217,7 @@ postfix_setup_xoauth2_post_setup() {
 	if [ -n "$XOAUTH2_CLIENT_ID" ] && [ -n "$XOAUTH2_SECRET" ]; then
 		do_postconf -e 'smtp_sasl_security_options='
 		do_postconf -e 'smtp_sasl_mechanism_filter=xoauth2'
-		do_postconf -e 'smtp_tls_session_cache_database=btree:${data_directory}/smtp_scache'
+		do_postconf -e 'smtp_tls_session_cache_database=lmdb:${data_directory}/smtp_scache'
 	fi
 }
 
@@ -429,8 +472,16 @@ execute_post_init_scripts() {
 		notice "Executing any found custom scripts..."
 		for f in /docker-init.db/*; do
 			case "$f" in
-				*.sh)     chmod +x "$f"; echo -e "\trunning ${emphasis}$f${reset}"; . "$f" ;;
-				*)        echo "$0: ignoring $f" ;;
+				*.sh)
+					if [[ -x "$f" ]]; then
+						echo -e "\tsourcing ${emphasis}$f${reset}"
+						. "$f"
+					else
+						echo -e "\trunning ${emphasis}bash $f${reset}"
+					fi
+					;;
+				*)
+					echo "$0: ignoring $f" ;;
 			esac
 		done
 	fi

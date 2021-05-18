@@ -108,7 +108,7 @@ load /code/scripts/common-run.sh
 	local status=$?
 	[ "$status" -eq 0 ]
 
-	cat /etc/postfix/main.cf | grep -q -E '^\s*smtp_tls_session_cache_database\s*=\s*btree:\$\{data_directory\}/smtp_scache$'
+	cat /etc/postfix/main.cf | grep -q -E '^\s*smtp_tls_session_cache_database\s*=\s*lmdb:\$\{data_directory\}/smtp_scache$'
 	local status=$?
 	[ "$status" -eq 0 ]
 }

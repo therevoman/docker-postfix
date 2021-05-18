@@ -25,7 +25,8 @@ RUN        true && \
            apk add --no-cache postfix && \
            apk add --no-cache opendkim && \
            apk add --no-cache --upgrade ca-certificates tzdata supervisor rsyslog musl musl-utils bash opendkim-utils libcurl jsoncpp lmdb && \
-           (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true)
+           (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true) && \
+           cp -r /etc/postfix /etc/postfix.template
 
 # Copy SASL-XOAUTH2 plugin
 COPY       --from=build /sasl-xoauth2/build/src/libsasl-xoauth2.so /usr/lib/sasl2/

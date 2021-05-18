@@ -70,7 +70,8 @@ container:
 
 # Define data which should be stored in a Secret
 # (and shared with the pod as environment variables)
-# secret: {}
+# secret:
+#   hello: world
 
 config:
   general: {}
@@ -103,3 +104,32 @@ persistence:
   existingClaim: ""
   size: 1Gi
   storageClass: ""
+
+
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 60
+  failureThreshold: 2
+  exec:
+    command:
+      - sh
+      - -c
+      - 'printf "EHLO healthcheck\n" | nc 127.0.0.1 587 | grep -qE "^220.*ESMTP Postfix"'
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 2
+  exec:
+    command:
+      - sh
+      - -c
+      - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "/usr/libexec/postfix/master"'
+startupProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 12
+  exec:
+    command:
+      - sh
+      - -c
+      - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "{postfix-script}" && ps axf | fgrep -v grep | fgrep -q "{opendkim.sh}"'

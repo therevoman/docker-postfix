@@ -62,32 +62,9 @@ spec:
             - name: smtp
               containerPort: 587
               protocol: TCP
-          readinessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 60
-            exec:
-              command:
-                - sh
-                - -c
-                - 'printf "EHLO healthcheck\n" | nc 127.0.0.1 587 | grep -qE "^220.*ESMTP Postfix"'
-          livenessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 1
-            exec:
-              command:
-                - sh
-                - -c
-                - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "/usr/libexec/postfix/master"'
-          startupProbe:
-            initialDelaySeconds: 2
-            periodSeconds: 5
-            failureThreshold: 12
-            exec:
-              command:
-                - sh
-                - -c
-                - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "{postfix-script}" && ps axf | fgrep -v grep | fgrep -q "{opendkim.sh}"'
+          readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12 }}
+          livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12 }}
+          startupProbe: {{- toYaml .Values.startupProbe | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ $fullName | quote }}

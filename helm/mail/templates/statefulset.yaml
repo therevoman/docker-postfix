@@ -76,17 +76,26 @@ spec:
           volumeMounts:
             - mountPath: /var/spool/postfix
               name: {{ $fullName }}
+            - mountPath: /var/spool/postfix/private
+              name: private
+            - mountPath: /var/spool/postfix/public
+              name: private
             {{- if .Values.extraVolumeMounts }}{{- toYaml .Values.extraVolumeMounts | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
-      {{- if .Values.persistence.enabled }}
-      {{ if .Values.extraVolumes }}volumes: {{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
-      {{- if .Values.persistence.existingClaim }}
       volumes:
+      {{- if .Values.persistence.enabled }}
+        # Socket directories
+        - name: public
+          emptyDir: {}
+        - name: private
+          emptyDir: {}
+        {{- if .Values.persistence.existingClaim }}
         - name: {{ $fullName }}
           persistentVolumeClaim:
             {{- with .Values.persistence.existingClaim }}
             claimName: {{ tpl . $ }}
             {{- end }}
+<<<<<<< HEAD
         {{- if .Values.extraVolumes }}{{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
       {{- else }}
       volumes:
@@ -99,12 +108,16 @@ spec:
         - name: {{ $fullName }}
           emptyDir: {}
         {{- if .Values.extraVolumes }}{{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
+=======
+        {{ end }}
+        {{ if .Values.extraVolumes -}}{{- toYaml .Values.extraVolumes | nindent 8 }}{{ end }}
+>>>>>>> 0b8ed0f (Fix #66: mount sockets into a temporary directory)
       {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
         name: {{ $fullName }}
-        namespace: infrastructure
+        namespace: {{ .Release.Namespace }}
       spec:
         accessModes: {{- toYaml .Values.persistence.accessModes | nindent 10 }}
         {{- if (eq "-" .Values.persistence.storageClass) }}

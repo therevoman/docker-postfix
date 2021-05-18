@@ -454,7 +454,8 @@ Chart configuration is as follows:
 | `fullnameOverride` | `""` | Override the helm full deployment name |
 | `serviceAccount.create` | `true` | Specifies whether a service account should be created |
 | `serviceAccount.annotations` | `{}` | Annotations to add to the service account |
-| `serviceAccount.name` | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `service.type` | `ClusterIP` | How is the server exposed |
+| `serviceAccount.name` | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| `service.type` | `ClusterIP` | How is the server exposed |
 | `service.port` | `587` | SMTP submission port |
 | `service.labels` | `{}` | Additional service labels |
 | `service.annotations` | `{}` | Additional service annotations |
@@ -463,7 +464,7 @@ Chart configuration is as follows:
 | `autoscaling.minReplicas` | `1` | Minimum number of replicas |
 | `autoscaling.maxReplicas` | `100` | Maximum number of replicas |
 | `autoscaling.targetCPUUtilizationPercentage` | `80` | When to scale up |
-| `autoscaling.targetMemoryUtilizationPercentage` | `` | When to scale up |
+| `autoscaling.targetMemoryUtilizationPercentage` | `""` | When to scale up |
 | `autoscaling.labels` | `{}` | Additional HPA labels |
 | `autoscaling.annotations` | `{}` | Additional HPA annotations |
 | `nodeSelector` | `{}` | Standard Kubernetes stuff |

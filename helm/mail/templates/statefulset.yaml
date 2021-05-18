@@ -91,6 +91,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ $fullName | quote }}
+            {{- with .Values.secret }}
+            - secretRef:
+                name: {{ $fullName | quote }}
+            {{- end }}
           {{ with .Values.extraEnv }}env: {{- toYaml . | nindent 12 }}{{ end }}
           volumeMounts:
             - mountPath: /var/spool/postfix

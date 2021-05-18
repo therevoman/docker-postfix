@@ -68,6 +68,10 @@ container:
   postfix:
     securityContext: {}
 
+# Define data which should be stored in a Secret
+# (and shared with the pod as environment variables)
+# secret: {}
+
 config:
   general: {}
     # e.g.

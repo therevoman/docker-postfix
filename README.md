@@ -459,6 +459,7 @@ Chart configuration is as follows:
 | `service.port` | `587` | SMTP submission port |
 | `service.labels` | `{}` | Additional service labels |
 | `service.annotations` | `{}` | Additional service annotations |
+| `service.nodePort` | *empty* | Use a specific `nodePort` |
 | `resources` | `{}` | [Pod resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
 | `autoscaling.enabled` | `false` | Set to `true` to enable [Horisontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) |
 | `autoscaling.minReplicas` | `1` | Minimum number of replicas |

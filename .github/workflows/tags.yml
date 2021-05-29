@@ -8,26 +8,42 @@ jobs:
   buildx:
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout tag
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: Checkout gh-pages
         uses: actions/checkout@v2
         with:
           ref: "gh-pages"
           path: "gh-pages"
           fetch-depth: 1
-      - name: Get the build version number
+
+      - name: Get release version
         id: version_number
         shell: bash
         run: |
           echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
           echo "::set-output name=RELEASE_VERSION::${GITHUB_REF:10}"
 
+
+
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@master
+        with:
+          install: true
+
+      - name: Builder info
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -38,19 +54,66 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-single-buildx-
 
-      - name: Build Alpine tag
-        env:
-          DOCKER_USERNAME: 'boky'
-          DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
-          PLATFORMS: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le"
-        run: ./build.sh -t boky/postfix:$RELEASE_VERSION --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache-new" --push
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: 'boky'
+          password: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
 
-      - name: Build Ubuntu tag
-        env:
-          DOCKER_USERNAME: 'boky'
-          DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
-          PLATFORMS: "linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
-        run: ./build.sh -t boky/postfix:ubuntu-$RELEASE_VERSION --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache-new" --build-arg=BASE_IMAGE=ubuntu:focal --push
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      - name: Build and push unmarked release
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: boky/postfix:$RELEASE_VERSION
+          platforms: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le" # linux/s390x: "rsyslog (no such package)"
+          cache-from: type=local,src=/tmp/.buildx-cache/alpine
+          cache-to: type=local,dest=/tmp/.buildx-cache-new/alpine
+          build-args: |
+            BASE_IMAGE=alpine:latest
+
+      - name: Build and push Alpine
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: boky/postfix:$RELEASE_VERSION-alpine
+          platforms: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le" # linux/s390x: "rsyslog (no such package)"
+          cache-from: type=local,src=/tmp/.buildx-cache-new/alpine
+          build-args: |
+            BASE_IMAGE=alpine:latest
+
+      - name: Build and push Ubuntu
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: boky/postfix:$RELEASE_VERSION-ubuntu
+          platforms: "linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
+          cache-from: type=local,src=/tmp/.buildx-cache/ubuntu
+          cache-to: type=local,dest=/tmp/.buildx-cache-new/ubuntu
+          build-args: |
+            BASE_IMAGE=ubuntu:focal
 
       - name: Move cache
         run: |
@@ -68,10 +131,12 @@ jobs:
           REPO: ${{ github.repository }}
       # TODO: Include the changelog in Chart.yml as annotations.artifacthub.io/changes
       # See more here: https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations
+
       - name: Package helm chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
           exec: helm package --app-version $RELEASE_VERSION --version $RELEASE_VERSION --destination ./gh-pages helm/mail
+
       - name: Create helm chart index
         uses: WyriHaximus/github-action-helm3@v2
         with:
@@ -82,6 +147,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./gh-pages
           tag_name: gh-pages-${{ steps.version_number.outputs.RELEASE_VERSION }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

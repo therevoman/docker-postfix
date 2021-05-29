@@ -483,7 +483,8 @@ Chart configuration is as follows:
 | `config.general` | `{}` | Key-value list of general configuration options, e.g. `TZ: "Europe/London"` |
 | `config.postfix` | `{}` | Key-value list of general postfix options, e.g. `myhostname: "demo"` |
 | `config.opendkim` | `{}` | Key-value list of general OpenDKIM options, e.g. `RequireSafeKeys: "yes"` |
-| `persistence.enabled` | `true` | Persist Postfix's queu on disk |
+| `secret` | `{}` | Key-value list of environment variables to be shared with Postfix / OpenDKIM as secrets |
+| `persistence.enabled` | `true` | Persist Postfix's queue on disk |
 | `persistence.accessModes` | `[ 'ReadWriteOnce' ]` | Access mode |
 | `persistence.existingClaim` | `""` | Provide an existing `PersistentVolumeClaim`, the value is evaluated as a template. |
 | `persistence.size` | `1Gi` | Storage size |

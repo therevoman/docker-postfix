@@ -39,7 +39,7 @@ jobs:
         env:
           DOCKER_USERNAME: 'boky'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
-          PLATFORMS: "linux/386,linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
+          PLATFORMS: "linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
         run: ./build.sh -t boky/postfix:ubuntu-$RELEASE_VERSION --build-arg=BASE_IMAGE=ubuntu:focal --push
       - name: Copy `README.md` and `LICENCE` into the helm chart
         id: readme_and_licence

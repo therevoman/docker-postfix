@@ -99,8 +99,9 @@ spec:
           emptyDir: {}
         {{- if .Values.certs.create }}
         - name: certs-init
-          secret:
-            configMapName: {{ $fullName }}
+          configMap:
+            name: {{ $fullName }}
+            defaultMode: 0755
         - name: certs
           secret:
             secretName: {{ $fullName }}-certs

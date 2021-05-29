@@ -18,6 +18,8 @@ data:
   {{- end }}
   {{- if .Values.certs.create }}
   _enable_tls.sh: |
+    #!/usr/bin/env bash
+    set -e
     do_postconf -e 'smtp_use_tls=yes'
     do_postconf -e 'smtp_tls_note_starttls_offer=yes'
     do_postconf -e 'smtpd_tls_cert_file=/var/run/certs/tls.crt'

@@ -495,6 +495,7 @@ execute_post_init_scripts() {
 						. "$f"
 					else
 						echo -e "\trunning ${emphasis}bash $f${reset}"
+						bash "$f"
 					fi
 					;;
 				*)

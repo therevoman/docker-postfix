@@ -10,6 +10,7 @@ Simple postfix relay host ("postfix null client") for your Docker containers. Ba
 * [Description](#description)
 * [TL;DR](#tldr)
 * [Updates](#updates)
+* [Architectures](#architectures)
 * [Configuration options](#configuration-options)
   * [General options](#general-options)
     * [Inbound debugging](#inbound-debugging)
@@ -111,6 +112,10 @@ unsuitable to link to packages with GPL-incompatible licenses. As a result Alpin
 While this should affect most of the users (`/etc/postfix/main.cf` is managed by this image), there might be use cases where
 people have their own configuration which relies on `hash` and `btree` databases. To avoid braking live systems, the version of this
 image has been updated to `v3.0.0.`.
+
+## Architectures
+
+Available for all your favourite architectures. Run in on your server cluster. Run it on your Raspberry Pi 4. Run it on your acient Pentium or an old Beaglebone. The following architectures are supported: `linux/386`, `linux/amd64`, `linux/arm/v6`, `linux/arm/v7`, `linux/arm64` and `linux/ppc64le`.
 
 ## Configuration options
 

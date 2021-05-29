@@ -115,7 +115,7 @@ image has been updated to `v3.0.0.`.
 
 ## Architectures
 
-Available for all your favourite architectures. Run in on your server cluster. Run it on your Raspberry Pi 4. Run it on your acient Pentium or an old Beaglebone. The following architectures are supported: `linux/386`, `linux/amd64`, `linux/arm/v6`, `linux/arm/v7`, `linux/arm64` and `linux/ppc64le`.
+Available for all your favourite architectures. Run in your server cluster. Run it on your Raspberry Pi 4. Run it on your acient Pentium or an old Beaglebone. The following architectures are supported: `linux/386`, `linux/amd64`, `linux/arm/v6`, `linux/arm/v7`, `linux/arm64` and `linux/ppc64le`.
 
 ## Configuration options
 

@@ -460,6 +460,7 @@ Chart configuration is as follows:
 | `service.labels` | `{}` | Additional service labels |
 | `service.annotations` | `{}` | Additional service annotations |
 | `service.nodePort` | *empty* | Use a specific `nodePort` |
+| `service.nodeIP` | *empty* | Use a specific `nodeIP` |
 | `resources` | `{}` | [Pod resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
 | `autoscaling.enabled` | `false` | Set to `true` to enable [Horisontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) |
 | `autoscaling.minReplicas` | `1` | Minimum number of replicas |
@@ -471,6 +472,7 @@ Chart configuration is as follows:
 | `nodeSelector` | `{}` | Standard Kubernetes stuff |
 | `tolerations` | `[]` | Standard Kubernetes stuff |
 | `affinity` | `{}` | Standard Kubernetes stuff |
+| `certs.create` | `{}` | Auto generate TLS certificates for Postfix |
 | `extraVolumes` | `[]` | Append any extra volumes to the pod |
 | `extraVolumeMounts` | `[]` | Append any extra volume mounts to the postfix container |
 | `extraInitContainers` | `[]` | Execute any extra init containers on startup |

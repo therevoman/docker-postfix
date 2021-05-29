@@ -71,7 +71,7 @@ container:
 
 # Auto-generate certificates for the server and mount them into Postfix volume
 certs:
-  create: true
+  create: false
 
 # Define data which should be stored in a Secret
 # (and shared with the pod as environment variables)

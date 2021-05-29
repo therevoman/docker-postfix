@@ -42,11 +42,11 @@ jobs:
         env:
           DOCKER_USERNAME: 'boky'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
-          PLATFORMS: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
+          PLATFORMS: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le" # linux/s390x: "rsyslog (no such package)"
         run: ./build.sh -t boky/postfix:latest --push
       - name: Build Ubuntu master
         env:
           DOCKER_USERNAME: 'boky'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_ACCESS_TOKEN }}'
           PLATFORMS: "linux/386,linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x"
-        run: ./build.sh -t boky/postfix:ubuntu-latest --push
+        run: ./build.sh -t boky/postfix:ubuntu-latest --build-arg=BASE_IMAGE=ubuntu:focal --push

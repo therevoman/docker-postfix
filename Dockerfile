@@ -16,9 +16,8 @@ RUN        true && \
              apt-get update -y -q && \
              apt-get install -y git build-essential cmake pkg-config libcurl4-nss-dev libjsoncpp-dev libsasl2-dev; \
            fi
-
+RUN        git clone --depth 1 --branch ${SASL_XOAUTH2_GIT_REF} ${SASL_XOAUTH2_REPO_URL} /sasl-xoauth2
 RUN        true && \
-           git clone --depth 1 --branch ${SASL_XOAUTH2_GIT_REF} ${SASL_XOAUTH2_REPO_URL} /sasl-xoauth2  && \
            cd /sasl-xoauth2 && \
            mkdir build && \
            cd build && \

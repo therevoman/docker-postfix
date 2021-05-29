@@ -68,10 +68,15 @@ container:
   postfix:
     securityContext: {}
 
+# Auto-generate certificates for the server and mount them into Postfix volume
+certs:
+  create: true
+
 # Define data which should be stored in a Secret
 # (and shared with the pod as environment variables)
 # secret:
 #   hello: world
+secret: {}
 
 config:
   general: {}
@@ -123,7 +128,9 @@ livenessProbe:
     command:
       - sh
       - -c
-      - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "/usr/libexec/postfix/master"'
+      - >-
+        ps axf | fgrep -v grep | egrep -q '\{supervisord\}|/usr/bin/supervisord' &&
+        ps axf | fgrep -v grep | egrep -q '(/usr/lib/postfix/sbin/|/usr/libexec/postfix/)master'
 startupProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
@@ -132,4 +139,7 @@ startupProbe:
     command:
       - sh
       - -c
-      - 'ps axf | fgrep -v grep | fgrep -q "{supervisord}" && ps axf | fgrep -v grep | fgrep -q "{postfix-script}" && ps axf | fgrep -v grep | fgrep -q "{opendkim.sh}"'
+      - >-
+        ps axf | fgrep -v grep | egrep -q '\{supervisord\}|/usr/bin/supervisord' &&
+        ps axf | fgrep -v grep | fgrep -q "postfix-script" &&
+        ps axf | fgrep -v grep | fgrep -q 'opendkim.sh'

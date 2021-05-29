@@ -80,6 +80,15 @@ spec:
               name: private
             - mountPath: /var/spool/postfix/public
               name: private
+            {{- if .Values.certs.create }}
+            - name: certs
+              mountPath: /var/run/certs
+              readOnly: true
+            - name: certs-init
+              mountPath: /docker-init.db/_enable_tls.sh
+              readOnly: true
+              subPath: _enable_tls.sh
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}{{- toYaml .Values.extraVolumeMounts | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -88,6 +97,14 @@ spec:
           emptyDir: {}
         - name: private
           emptyDir: {}
+        {{- if .Values.certs.create }}
+        - name: certs-init
+          secret:
+            configMapName: {{ $fullName }}
+        - name: certs
+          secret:
+            secretName: {{ $fullName }}-certs
+        {{- end }}
         {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
         - name: {{ $fullName }}
           persistentVolumeClaim:

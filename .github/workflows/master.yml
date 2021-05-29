@@ -31,15 +31,6 @@ jobs:
       - name: Run unit tests
         run: ./unit-tests.sh
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-single-buildx-${{ hashFiles('**/Dockerfile') }}
-          #key: ${{ runner.os }}-single-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-single-buildx-
-
       - name: Run integration tests
         shell: bash
         env: # Or as an environment variable
@@ -73,6 +64,15 @@ jobs:
           echo "Status:    ${{ steps.buildx.outputs.status }}"
           echo "Flags:     ${{ steps.buildx.outputs.flags }}"
           echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-single-buildx-${{ hashFiles('**/Dockerfile') }}
+          #key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-single-buildx-
 
       - name: Login to DockerHub
         uses: docker/login-action@v1

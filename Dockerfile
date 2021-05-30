@@ -26,7 +26,7 @@ RUN        true && \
 
 # ============================ BUILD SASL XOAUTH2 ============================
 FROM ${BASE_IMAGE}
-LABEL maintaner="Bojan Cekrlic - https://github.com/bokysan/docker-postfix/"
+LABEL maintainer="Bojan Cekrlic - https://github.com/bokysan/docker-postfix/"
 
 # Install supervisor, postfix
 # Install postfix first to get the first account (101)

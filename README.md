@@ -18,7 +18,7 @@ Simple postfix relay host ("postfix null client") for your Docker containers. Ba
     * [Log format](#log-format)
   * [Postfix-specific options](#postfix-specific-options)
     * [RELAYHOST, RELAYHOST_USERNAME and RELAYHOST_PASSWORD](#relayhost-relayhost_username-and-relayhost_password)
-    * [RELAYHOST_TLS_LEVEL](#relayhost_tls_level)
+    * [POSTFIX_smtp_tls_security_level](#postfix_smtp_tls_security_level)
     * [XOAUTH2_CLIENT_ID, XOAUTH2_SECRET, XOAUTH2_INITIAL_ACCESS_TOKEN and XOAUTH2_INITIAL_REFRESH_TOKEN](#xoauth2_client_id-xoauth2_secret-xoauth2_initial_access_token-and-xoauth2_initial_refresh_token)
     * [MASQUERADED_DOMAINS](#masqueraded_domains)
     * [SMTP_HEADER_CHECKS](#smtp_header_checks)
@@ -162,7 +162,7 @@ To change the log format, set the (unsurprisingly named) variable `LOG_FORMAT=js
 * `RELAYHOST_USERNAME` = An (optional) username for the relay server
 * `RELAYHOST_PASSWORD` = An (optional) login password for the relay server
 * `RELAYHOST_PASSWORD_FILE` = An (optional) file containing the login password for the relay server. Mutually exclusive with the previous option.
-* `RELAYHOST_TLS_LEVEL` = Relay host TLS connection level
+* `POSTFIX_smtp_tls_security_level` = Relay host TLS connection level
 * `XOAUTH2_CLIENT_ID` = OAuth2 client id used when configured as a relayhost.
 * `XOAUTH2_SECRET` = OAuth2 secret used when configured as a relayhost.
 * `XOAUTH2_INITIAL_ACCESS_TOKEN` = Initial OAuth2 access token.
@@ -204,7 +204,7 @@ If your end server requires you to authenticate with username/password, add them
 docker run --rm --name postfix -e RELAYHOST=mail.google.com -e RELAYHOST_USERNAME=hello@gmail.com -e RELAYHOST_PASSWORD=world -p 1587:587 boky/postfix
 ```
 
-#### `RELAYHOST_TLS_LEVEL`
+#### `POSTFIX_smtp_tls_security_level`
 
 Define relay host TLS connection level. See [smtp_tls_security_level](http://www.postfix.org/postconf.5.html#smtp_tls_security_level) for details. By default, the permissive level ("may") is used, which basically means "use TLS if available" and should be a sane default in most cases.
 
@@ -226,7 +226,7 @@ Example:
 docker run --rm --name pruebas-postfix \
     -e RELAYHOST="[smtp.gmail.com]:587" \
     -e RELAYHOST_USERNAME="<put.your.account>@gmail.com" \
-    -e RELAYHOST_TLS_LEVEL="encrypt" \
+    -e POSTFIX_smtp_tls_security_level="encrypt" \
     -e XOAUTH2_CLIENT_ID="<put_your_oauth2_client_id>" \
     -e XOAUTH2_SECRET="<put_your_oauth2_secret>" \
     -e ALLOW_EMPTY_SENDER_DOMAINS="true" \
@@ -417,7 +417,7 @@ As an alternative to passing sensitive information via environment variables, `_
 docker run --rm --name pruebas-postfix \
     -e RELAYHOST="[smtp.gmail.com]:587" \
     -e RELAYHOST_USERNAME="<put.your.account>@gmail.com" \
-    -e RELAYHOST_TLS_LEVEL="encrypt" \
+    -e POSTFIX_smtp_tls_security_level="encrypt" \
     -e XOAUTH2_CLIENT_ID_FILE="/run/secrets/xoauth2-client-id" \
     -e XOAUTH2_SECRET_FILE="/run/secrets/xoauth2-secret" \
     -e ALLOW_EMPTY_SENDER_DOMAINS="true" \

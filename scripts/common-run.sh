@@ -147,12 +147,14 @@ postfix_set_hostname() {
 }
 
 postfix_set_relay_tls_level() {
-	if [ -z "$RELAYHOST_TLS_LEVEL" ]; then
+	if [ ! -z "$RELAYHOST_TLS_LEVEL" ]; then
+		deprecated "${emphasis}RELAYHOST_TLS_LEVEL${reset} variable is deprecated. Please use ${emphasis}POSTFIX_smtp_tls_security_level${reset} instead."
+		POSTFIX_smtp_tls_security_level="$RELAYHOST_TLS_LEVEL"
+	fi
+
+	if [ -z "$POSTFIX_smtp_tls_security_level" ]; then
 		info "Setting smtp_tls_security_level: ${emphasis}may${reset}"
-		do_postconf -e "smtp_tls_security_level=may"
-	else
-		notice "Setting smtp_tls_security_level: ${emphasis}$RELAYHOST_TLS_LEVEL${reset}"
-		do_postconf -e "smtp_tls_security_level=$RELAYHOST_TLS_LEVEL"
+		POSTFIX_smtp_tls_security_level="may"
 	fi
 }
 
@@ -177,6 +179,9 @@ postfix_setup_relayhost() {
 				echo "$RELAYHOST $RELAYHOST_USERNAME:$RELAYHOST_PASSWORD" >> /etc/postfix/sasl_passwd
 			fi
 			postmap lmdb:/etc/postfix/sasl_passwd
+			chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.lmdb
+			chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.lmdb
+
 			do_postconf -e "smtp_sasl_auth_enable=yes"
 			do_postconf -e "smtp_sasl_password_maps=lmdb:/etc/postfix/sasl_passwd"
 			do_postconf -e "smtp_sasl_security_options=noanonymous"

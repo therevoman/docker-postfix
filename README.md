@@ -460,6 +460,7 @@ Chart configuration is as follows:
 | `service.port` | `587` | SMTP submission port |
 | `service.labels` | `{}` | Additional service labels |
 | `service.annotations` | `{}` | Additional service annotations |
+| `service.spec` | `{}` | Additional service specifications |
 | `service.nodePort` | *empty* | Use a specific `nodePort` |
 | `service.nodeIP` | *empty* | Use a specific `nodeIP` |
 | `resources` | `{}` | [Pod resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |

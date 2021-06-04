@@ -6,6 +6,7 @@
 {{- $checksums := include (print $chart ".checksums") . -}}
 {{- $serviceAccountName := include (print $chart ".serviceAccountName") . -}}
 {{- $kind := "StatefulSet" -}}
+{{- $root := . -}}
 apiVersion: apps/v1
 kind: {{ $kind | quote }}
 metadata:
@@ -30,9 +31,11 @@ spec:
         {{- $selectorLabels | nindent 8 }}
         {{- with .Values.pod.labels }}{{ toYaml . | nindent 8 }}{{- end }}
       annotations:
+        {{- if .Values.recreateOnRedeploy }}
         # https://keel.sh/docs/#helm-same-tag-force-updates
         # Current consensus on a best way to "force" update Helm releases is by modifying your pod spec template by adding:
         date/deploy-date: {{ now | quote }}
+        {{- end }}
         {{- $checksums | nindent 8 }}
         {{- with .Values.pod.annotations }}{{ toYaml . | nindent 8 }}{{ end }}
     spec:
@@ -92,7 +95,7 @@ spec:
             {{- if .Values.extraVolumeMounts }}{{- toYaml .Values.extraVolumeMounts | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
         {{- if .Values.extraContainers }}
-{{ tpl .Values.extraContainers . | indent 8 }}
+        {{- tpl .Values.extraContainers $root | nindent 8 }}
         {{- end }}
       volumes:
         # Socket directories

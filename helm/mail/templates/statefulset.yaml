@@ -91,6 +91,9 @@ spec:
             {{- end }}
             {{- if .Values.extraVolumeMounts }}{{- toYaml .Values.extraVolumeMounts | nindent 12 }}{{ end }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.extraContainers }}
+{{ tpl .Values.extraContainers . | indent 8 }}
+        {{- end }}
       volumes:
         # Socket directories
         - name: public

@@ -113,7 +113,6 @@ persistence:
   size: 1Gi
   storageClass: ""
 
-
 readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 60
@@ -134,6 +133,7 @@ livenessProbe:
       - >-
         ps axf | fgrep -v grep | egrep -q '\{supervisord\}|/usr/bin/supervisord' &&
         ps axf | fgrep -v grep | egrep -q '(/usr/lib/postfix/sbin/|/usr/libexec/postfix/)master'
+
 startupProbe:
   initialDelaySeconds: 5
   periodSeconds: 5

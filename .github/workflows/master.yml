@@ -2,7 +2,7 @@ name: Docker image
 
 on:
   push:
-    branches: master
+    branches: [ 'master' ]
 
 jobs:
   buildx:
@@ -72,8 +72,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-single-buildx-${{ hashFiles('**/Dockerfile') }}
-          #key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          #key: ${{ runner.os }}-single-buildx-${{ hashFiles('**/Dockerfile') }}
+          key: ${{ runner.os }}-single-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-single-buildx-
 

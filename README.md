@@ -495,6 +495,7 @@ Chart configuration is as follows:
 | `persistence.existingClaim` | `""` | Provide an existing `PersistentVolumeClaim`, the value is evaluated as a template. |
 | `persistence.size` | `1Gi` | Storage size |
 | `persistence.storageClass` | `""` | Storage class |
+| `recreateOnRedeploy` | `true` | Restart Pods on every helm deployment, to prevent issues with stale configuration(s). |
 
 ## Extending the image
 

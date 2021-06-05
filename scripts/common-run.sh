@@ -55,7 +55,9 @@ reown_folders() {
 	chown root: /var/spool/postfix/pid
 
 	do_postconf -e "manpage_directory=/usr/share/man"
-	postfix -c /etc/postfix/ set-permissions || true
+
+	# postfix set-permissions complains if documentation files do not exist
+	postfix -c /etc/postfix/ set-permissions > /dev/null 2>&1 || true
 }
 
 postfix_upgrade_conf() {

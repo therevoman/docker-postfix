@@ -56,6 +56,8 @@ spec:
       {{- tpl .Values.extraInitContainers . | nindent 6 }}
       {{- end }}
 
+      # Allow up to 2 minutes for Postfix to flush / empty the queue  before shutting down the container
+      terminationGracePeriodSeconds: 120
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -68,6 +70,17 @@ spec:
           readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12 }}
           livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12 }}
           startupProbe: {{- toYaml .Values.startupProbe | nindent 12 }}
+          lifecycle:
+            # If a container has a preStop hook configured, that runs before the container enters the Terminated state.
+            preStop:
+              exec:
+                command:
+                  - bash
+                  - -c
+                  - touch /tmp/container_is_terminating && while ! [[ "`mailq`" == *empty* ]]; do echo "Flushing queue..." && postfix flush; sleep 1; done
+            {{- if .Values.lifecycle.postStart }}
+            postStart: {{- toYaml .Values.lifecycle.postStart | nindent 14 }}
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ $fullName | quote }}

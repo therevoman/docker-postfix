@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: boky/postfix
+  repository: jevans3/postfix
   # tag: "" # If not specified uses chart's AppVersion as the tag
   pullPolicy: IfNotPresent
 

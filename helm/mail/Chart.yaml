@@ -1,13 +1,13 @@
 apiVersion: v2
 name: mail
 description: An outgoing SMTP mail relay for your applications in Kubernetes cluster
-icon: https://bokysan.github.io/docker-postfix/postfix.png
+icon: https://jevans3.github.io/docker-postfix/postfix.png
 home: https://github.com/bokysan/docker-postfix
 sources:
-  - https://github.com/bokysan/docker-postfix
+  - https://github.com/jevans3/docker-postfix
 maintainers:
-  - name: Bokysan
-    url: https://github.com/bokysan
+  - name: Jevans3
+    url: https://github.com/jevans3
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,7 +22,7 @@ type: application
 # This is the chart version.
 # The version will be automatically set by the build script in .github/workflows/tags.yml when a
 # new version of the app is released.
-version: v1.0.0
+version: v1.1.3
 
 # This is the version number of the application being deployed.
 # The version will be automatically set by the build script in .github/workflows/tags.yml when a

@@ -12,7 +12,7 @@ RUN        true && \
              apk add --no-cache --upgrade cmake clang make gcc g++ libc-dev pkgconfig curl-dev jsoncpp-dev cyrus-sasl-dev; \
            else \
              export DEBIAN_FRONTEND=noninteractive && \
-             echo "Europe/Berlin" > /etc/timezone && \
+             echo "America/New York" > /etc/timezone && \
              apt-get update -y -qq && \
              apt-get install -y git build-essential cmake pkg-config libcurl4-openssl-dev libssl-dev libjsoncpp-dev libsasl2-dev; \
            fi
@@ -26,7 +26,7 @@ RUN        true && \
 
 # ============================ BUILD SASL XOAUTH2 ============================
 FROM ${BASE_IMAGE}
-LABEL maintainer="Bojan Cekrlic - https://github.com/bokysan/docker-postfix/"
+LABEL maintainer="Jesse Evans - https://github.com/jevans3/docker-postfix/"
 
 # Install supervisor, postfix
 # Install postfix first to get the first account (101)
@@ -40,7 +40,7 @@ RUN        true && \
              (rm "/tmp/"* 2>/dev/null || true) && (rm -rf /var/cache/apk/* 2>/dev/null || true); \
            else \
              export DEBIAN_FRONTEND=noninteractive && \
-             echo "Europe/Berlin" > /etc/timezone && \
+             echo "America/New York" > /etc/timezone && \
              apt-get update -y -q && \
              apt-get install -y libsasl2-modules && \
              apt-get install -y postfix && \

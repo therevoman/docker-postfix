@@ -2,7 +2,7 @@ apiVersion: v2
 name: mail
 description: An outgoing SMTP mail relay for your applications in Kubernetes cluster
 icon: https://jevans3.github.io/docker-postfix/postfix.png
-home: https://github.com/bokysan/docker-postfix
+home: https://github.com/jevans3/docker-postfix
 sources:
   - https://github.com/jevans3/docker-postfix
 maintainers:

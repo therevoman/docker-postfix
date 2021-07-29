@@ -1,0 +1,4 @@
+FROM postfix:latest
+LABEL maintainer="Jesse Evans <jesse.evans@infor.com>"
+#RUN apk add cyrus-sasl-plain
+ADD cch-postfix-config.sh /docker-init.db/

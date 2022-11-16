@@ -20,7 +20,7 @@ LABEL name="therevoman/container-postfix" \
 ##    microdnf install opendkim -y && \
 #    microdnf clean all
 
-COPY sendmail-milter-8.16.1-10.el9.x86_64.rpm /tmp
+#COPY sendmail-milter-8.16.1-10.el9.x86_64.rpm /tmp
 
 RUN true && \
     dnf update -y && \
@@ -31,7 +31,7 @@ RUN true && \
     dnf install supervisor rsyslog -y && \
     dnf install pypolicyd-spf -y && \ 
     dnf install opendkim-tools perl-Getopt-Long -y && \
-    dnf install /tmp/sendmail-milter-8.16.1-10.el9.x86_64.rpm -y && \
+#    dnf install /tmp/sendmail-milter-8.16.1-10.el9.x86_64.rpm -y && \
     dnf install opendkim libgsasl libgsasl-devel cyrus-sasl cyrus-sasl-plain -y && \
     dnf clean all
 

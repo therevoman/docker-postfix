@@ -156,8 +156,13 @@ postfix_set_relay_tls_level() {
 
 	if [ -z "$POSTFIX_smtp_tls_security_level" ]; then
 		info "Setting smtp_tls_security_level: ${emphasis}may${reset}"
-		POSTFIX_smtp_tls_security_level="may"
+#		POSTFIX_smtp_tls_security_level="encrypt"
+#		do_postconf -e "smtp_tls_wrappermode = yes"
+#		do_postconf -e "smtp_tls_security_level = encrypt"
+
 	fi
+
+	POSTFIX_smtp_use_tls="yes"
 }
 
 postfix_setup_relayhost() {
@@ -166,7 +171,8 @@ postfix_setup_relayhost() {
 		do_postconf -e "relayhost=$RELAYHOST"
 		# Alternately, this could be a folder, like this:
 		# smtp_tls_CApath
-		do_postconf -e "smtp_tls_CAfile=/etc/ssl/certs/ca-certificates.crt"
+		#do_postconf -e "smtp_tls_CAfile=/etc/ssl/certs/ca-certificates.crt"
+		do_postconf -e "smtp_tls_CAfile=/etc/ssl/certs/ca-bundle.crt"
 
 		file_env 'RELAYHOST_PASSWORD'
 
@@ -185,12 +191,13 @@ postfix_setup_relayhost() {
 			else
 				echo "$SASL_RELAYHOST $RELAYHOST_USERNAME:$RELAYHOST_PASSWORD" >> /etc/postfix/sasl_passwd
 			fi
-			postmap lmdb:/etc/postfix/sasl_passwd
-			chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.lmdb
-			chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.lmdb
+			postmap /etc/postfix/sasl_passwd
+			chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
+			chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
+			do_postconf -e "smtp_use_tls=yes"
 			do_postconf -e "smtp_sasl_auth_enable=yes"
-			do_postconf -e "smtp_sasl_password_maps=lmdb:/etc/postfix/sasl_passwd"
+			do_postconf -e "smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd"
 			do_postconf -e "smtp_sasl_security_options=noanonymous"
 			do_postconf -e "smtp_sasl_tls_security_options=noanonymous"
 		else
@@ -246,7 +253,7 @@ postfix_setup_xoauth2_post_setup() {
 	if [ -n "$XOAUTH2_CLIENT_ID" ] && [ -n "$XOAUTH2_SECRET" ]; then
 		do_postconf -e 'smtp_sasl_security_options='
 		do_postconf -e 'smtp_sasl_mechanism_filter=xoauth2'
-		do_postconf -e 'smtp_tls_session_cache_database=lmdb:${data_directory}/smtp_scache'
+		do_postconf -e 'smtp_tls_session_cache_database=${data_directory}/smtp_scache'
 	fi
 }
 
@@ -294,9 +301,9 @@ postfix_setup_sender_domains() {
 			echo -e "$i\tOK" >> $allowed_senders
 		done
 		echo
-		postmap lmdb:$allowed_senders
+		postmap hash:$allowed_senders
 
-		do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access lmdb:$allowed_senders, reject"
+		do_postconf -e "smtpd_recipient_restrictions=reject_non_fqdn_recipient, reject_unknown_recipient_domain, check_sender_access hash:$allowed_senders, reject"
 
 		# Since we are behind closed doors, let's just permit all relays.
 		do_postconf -e "smtpd_relay_restrictions=permit"

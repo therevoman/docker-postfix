@@ -9,7 +9,7 @@ setup_timezone                      # Check if we need to configure the containe
 rsyslog_log_format                  # Setup rsyslog output format
 setup_conf                          # Copy over files from /etc/postfix.template to /etc/postfix, if the user mounted the folder manually
 reown_folders                       # Make and reown /var/spool/postfix/ folders
-postfix_upgrade_conf                # Upgrade old coniguration, replace "hash:" and "btree:" databases to "lmdb:"
+#postfix_upgrade_conf                # Upgrade old coniguration, replace "hash:" and "btree:" databases to "lmdb:"
 postfix_disable_utf8                # Disable SMTPUTF8, because libraries (ICU) are missing in alpine
 postfix_create_aliases              # Update aliases database. It's not used, but postfix complains if the .db file is missing
 postfix_disable_local_mail_delivery # Disable local mail delivery
